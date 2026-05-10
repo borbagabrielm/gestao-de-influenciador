@@ -1,0 +1,163 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg:        #0e0e10;
+    --bg2:       #16161a;
+    --bg3:       #1e1e24;
+    --bg4:       #26262e;
+    --border:    rgba(255,255,255,0.08);
+    --border2:   rgba(255,255,255,0.14);
+    --text:      #f0f0f2;
+    --text2:     #9090a0;
+    --text3:     #5a5a6e;
+    --accent:    #c8f043;
+    --accent2:   #a8d028;
+    --accent-dk: #1a2200;
+    --purple:    #9b6dff;
+    --purple-bg: #1e1530;
+    --teal:      #2dd4bf;
+    --teal-bg:   #0d2420;
+    --amber:     #fbbf24;
+    --amber-bg:  #221a0a;
+    --coral:     #f87171;
+    --coral-bg:  #220e0e;
+    --pink:      #f472b6;
+    --pink-bg:   #220e1a;
+    --blue:      #60a5fa;
+    --blue-bg:   #0e1a2e;
+    --green:     #4ade80;
+    --green-bg:  #0e2018;
+  }
+
+  body.light {
+    --bg:        #f0f2f5;
+    --bg2:       #ffffff;
+    --bg3:       #f5f7fa;
+    --bg4:       #e8eaed;
+    --border:    rgba(0,0,0,0.08);
+    --border2:   rgba(0,0,0,0.14);
+    --text:      #1a1a2e;
+    --text2:     #4a4a6a;
+    --text3:     #8a8aaa;
+    --accent:    #6abf2e;
+    --accent2:   #559920;
+    --accent-dk: #e8f5d8;
+    --purple:    #7c4dff;
+    --purple-bg: #ede7ff;
+    --teal:      #00897b;
+    --teal-bg:   #e0f2f1;
+    --amber:     #f57f17;
+    --amber-bg:  #fff8e1;
+    --coral:     #e53935;
+    --coral-bg:  #ffebee;
+    --pink:      #d81b60;
+    --pink-bg:   #fce4ec;
+    --blue:      #1565c0;
+    --blue-bg:   #e3f2fd;
+    --green:     #2e7d32;
+    --green-bg:  #e8f5e9;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px var(--bg3) inset !important;
+    -webkit-text-fill-color: var(--text) !important;
+    caret-color: var(--text) !important;
+  }
+}
+
+@layer components {
+  .sidebar-nav-item {
+    @apply flex items-center gap-2.5 px-2.5 py-2 rounded-lg cursor-pointer transition-all duration-150 text-[var(--text2)] text-sm mb-px;
+  }
+  .sidebar-nav-item:hover { background: var(--bg3); color: var(--text); }
+  .sidebar-nav-item.active { background: var(--accent-dk); color: var(--accent); font-weight: 500; }
+
+  .form-input {
+    @apply w-full rounded-lg px-3.5 py-2.5 text-sm outline-none transition-colors duration-200;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .form-input:focus { border-color: var(--accent); }
+
+  .btn-primary {
+    @apply px-6 py-2.5 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-150;
+    background: var(--accent);
+    color: #000;
+    border: none;
+  }
+  .btn-primary:hover { background: var(--accent2); }
+  .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+
+  .btn-ghost {
+    @apply px-5 py-2.5 rounded-lg text-sm cursor-pointer transition-all duration-150;
+    background: transparent;
+    border: 1px solid var(--border2);
+    color: var(--text2);
+  }
+  .btn-ghost:hover { background: var(--bg3); color: var(--text); }
+
+  .btn-danger {
+    @apply px-4 py-2.5 rounded-lg text-sm cursor-pointer transition-all duration-150;
+    background: var(--coral-bg);
+    border: 1px solid var(--coral);
+    color: var(--coral);
+  }
+  .btn-danger:hover { background: #3a1414; }
+
+  .card {
+    @apply rounded-xl p-4;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+  }
+
+  .stat-card {
+    @apply rounded-xl p-4 transition-colors duration-200;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+  }
+  .stat-card:hover { border-color: var(--border2); }
+
+  .tag-base {
+    @apply text-[10px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap;
+  }
+
+  .skeleton {
+    @apply rounded-lg animate-pulse;
+    background: var(--bg3);
+  }
+
+  .modal-overlay {
+    @apply fixed inset-0 z-50 flex items-center justify-center;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(8px);
+  }
+
+  .modal-box {
+    @apply rounded-2xl p-8 relative w-full max-h-[88vh] overflow-y-auto;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    max-width: 520px;
+  }
+  .modal-box.wide { max-width: 580px; }
+}
