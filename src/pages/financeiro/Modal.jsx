@@ -1,21 +1,30 @@
 import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabase'
 import Modal, { FormRow, FormGrid } from '@/components/Modal'
 import { F_CAT_ENTRADA, F_CAT_SAIDA } from '@/lib/constants'
 
-const EMPTY = { tipo:'entrada', desc:'', valor:'', data:'', origem:'', categoria:'', statusPgto:'confirmado', tags:[], notes:'' }
+const EMPTY = { tipo:'entrada', desc:'', valor:'', data:'', origem:'', categoria:'', statusPgto:'confirmado', tags:[], notes:'', prospect_id:'' }
 const TAGS  = ['publicidade','reels','stories','feed','equipe','fixo','variável']
 
 export default function FinModal({ open, onClose, onSave, onDelete, initial, tipoInicial }) {
-  const [form,   setForm]   = useState(EMPTY)
-  const [saving, setSaving] = useState(false)
-  const [errors, setErrors] = useState({})
+  const [form,      setForm]      = useState(EMPTY)
+  const [saving,    setSaving]    = useState(false)
+  const [errors,    setErrors]    = useState({})
+  const [prospects, setProspects] = useState([])
 
   useEffect(() => {
     if (open) {
-      setForm(initial ? { ...EMPTY, ...initial } : { ...EMPTY, tipo: tipoInicial, data: new Date().toISOString().split('T')[0] })
+      setForm(initial ? { ...EMPTY, ...initial, prospect_id: initial.prospect_id||'' } : { ...EMPTY, tipo: tipoInicial, data: new Date().toISOString().split('T')[0] })
       setErrors({})
     }
   }, [open, initial, tipoInicial])
+
+  useEffect(() => {
+    if (open) {
+      supabase.from('prospects').select('id,company').neq('status','perdido').order('company')
+        .then(({ data }) => setProspects(data || []))
+    }
+  }, [open])
 
   const set = (k,v) => { setForm(f=>({...f,[k]:v})); setErrors(e=>({...e,[k]:''})) }
   const toggleTag = t => setForm(f=>({ ...f, tags: f.tags.includes(t)?f.tags.filter(x=>x!==t):[...f.tags,t] }))
@@ -27,13 +36,12 @@ export default function FinModal({ open, onClose, onSave, onDelete, initial, tip
     if (!form.valor || isNaN(form.valor)) errs.valor = 'Informe um valor'
     if (Object.keys(errs).length) { setErrors(errs); return }
     setSaving(true)
-    await onSave({ ...form, valor: Number(form.valor) || 0 })
+    await onSave({ ...form, valor: Number(form.valor) || 0, prospect_id: form.prospect_id || null })
     setSaving(false)
   }
 
   return (
     <Modal open={open} onClose={onClose} title={initial ? 'Editar transação' : 'Nova transação'}>
-      {/* Tipo toggle */}
       <div className="flex rounded-xl overflow-hidden mb-4" style={{ border: '1px solid var(--border2)' }}>
         {['entrada','saida'].map(t => (
           <button key={t} type="button" onClick={() => set('tipo', t)}
@@ -52,7 +60,6 @@ export default function FinModal({ open, onClose, onSave, onDelete, initial, tip
         <input className={`form-input${errors.desc?' border-[var(--coral)]':''}`} value={form.desc} onChange={e=>set('desc',e.target.value)} placeholder="Ex: Publicidade Nike — Reels" />
         {errors.desc && <p className="text-xs mt-1" style={{ color:'var(--coral)' }}>{errors.desc}</p>}
       </FormRow>
-
       <FormGrid>
         <FormRow label="Valor (R$)">
           <input className={`form-input${errors.valor?' border-[var(--coral)]':''}`} type="number" value={form.valor} onChange={e=>set('valor',e.target.value)} placeholder="0" />
@@ -62,7 +69,6 @@ export default function FinModal({ open, onClose, onSave, onDelete, initial, tip
           <input className="form-input" type="date" value={form.data} onChange={e=>set('data',e.target.value)} />
         </FormRow>
       </FormGrid>
-
       <FormGrid>
         <FormRow label={form.tipo==='entrada'?'Marca / Origem':'Beneficiário'}>
           <input className="form-input" value={form.origem} onChange={e=>set('origem',e.target.value)} />
@@ -75,6 +81,14 @@ export default function FinModal({ open, onClose, onSave, onDelete, initial, tip
         </FormRow>
       </FormGrid>
 
+      {/* Vinculação com parceria */}
+      <FormRow label="🔗 Vincular à parceria">
+        <select className="form-input" style={{ appearance:'none' }} value={form.prospect_id} onChange={e=>set('prospect_id',e.target.value)}>
+          <option value="">— Nenhuma —</option>
+          {prospects.map(p => <option key={p.id} value={p.id}>{p.company}</option>)}
+        </select>
+      </FormRow>
+
       <FormRow label="Status pagamento">
         <select className="form-input" style={{ appearance:'none' }} value={form.statusPgto} onChange={e=>set('statusPgto',e.target.value)}>
           <option value="confirmado">Confirmado ✓</option>
@@ -83,7 +97,6 @@ export default function FinModal({ open, onClose, onSave, onDelete, initial, tip
           <option value="cancelado">Cancelado ✗</option>
         </select>
       </FormRow>
-
       <FormRow label="Tags">
         <div className="flex flex-wrap gap-1.5">
           {TAGS.map(t => (
@@ -100,7 +113,6 @@ export default function FinModal({ open, onClose, onSave, onDelete, initial, tip
           ))}
         </div>
       </FormRow>
-
       <FormRow label="Observações">
         <textarea className="form-input resize-y" rows={2} value={form.notes} onChange={e=>set('notes',e.target.value)} />
       </FormRow>

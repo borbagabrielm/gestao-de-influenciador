@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabase'
 import Modal, { FormRow, FormGrid, ModalActions } from '@/components/Modal'
 
 const EMPTY = { company:'', contact:'', email:'', value:'', followup:'', notes:'', pubdate:'', pgtoDate:'', finalValue:'', tags:[], modo:null, phase:1, status:'lead', statusHistory:[] }
@@ -6,10 +7,12 @@ const TIPOS = ['publicidade','permuta','seeding','collab','embaixadora']
 const MODOS = [{ v:'ativa', label:'🟢 Ativa' }, { v:'passiva', label:'🟣 Passiva' }]
 
 export default function ParceriasModal({ open, onClose, onSave, onDelete, initial }) {
-  const [form,    setForm]    = useState(EMPTY)
-  const [phase,   setPhase]   = useState(1)
-  const [saving,  setSaving]  = useState(false)
-  const [errors,  setErrors]  = useState({})
+  const [form,      setForm]      = useState(EMPTY)
+  const [phase,     setPhase]     = useState(1)
+  const [saving,    setSaving]    = useState(false)
+  const [errors,    setErrors]    = useState({})
+  const [conteudos, setConteudos] = useState([])
+  const [financeiro,setFinanceiro]= useState([])
 
   useEffect(() => {
     if (open) {
@@ -19,8 +22,19 @@ export default function ParceriasModal({ open, onClose, onSave, onDelete, initia
     }
   }, [open, initial])
 
-  const set = (k, v) => { setForm(f => ({ ...f, [k]: v })); setErrors(e => ({ ...e, [k]: '' })) }
+  useEffect(() => {
+    if (open && initial?.id) {
+      supabase.from('conteudos').select('id,titulo,status,rede_social,data_publicacao').eq('prospect_id', initial.id)
+        .then(({ data }) => setConteudos(data || []))
+      supabase.from('financeiro').select('id,descricao,tipo,valor,data').eq('prospect_id', initial.id)
+        .then(({ data }) => setFinanceiro(data || []))
+    } else {
+      setConteudos([])
+      setFinanceiro([])
+    }
+  }, [open, initial])
 
+  const set = (k, v) => { setForm(f => ({ ...f, [k]: v })); setErrors(e => ({ ...e, [k]: '' })) }
   const toggleTag = t => setForm(f => ({
     ...f,
     tags: f.tags.includes(t) ? f.tags.filter(x => x !== t) : [...f.tags, t]
@@ -30,12 +44,10 @@ export default function ParceriasModal({ open, onClose, onSave, onDelete, initia
     const errs = {}
     if (!form.company.trim()) errs.company = 'Obrigatório'
     if (Object.keys(errs).length) { setErrors(errs); return }
-
     let statusHistory = form.statusHistory || []
     if (initial && initial.status !== form.status && !statusHistory.includes(initial.status)) {
       statusHistory = [...statusHistory, initial.status]
     }
-
     setSaving(true)
     await onSave({ ...form, phase, statusHistory })
     setSaving(false)
@@ -52,6 +64,8 @@ export default function ParceriasModal({ open, onClose, onSave, onDelete, initia
     border: 'none', borderRadius: 7, color: active ? 'var(--accent)' : 'var(--text3)',
     fontFamily: 'inherit', fontSize: 12, fontWeight: 500, cursor: 'pointer',
   })
+
+  const statusColor = { backlog:'#5a5a6e', planejado:'#60a5fa', gravado:'#fbbf24', editado:'#c084fc', publicado:'#4ade80', arquivado:'#5a5a6e' }
 
   return (
     <Modal open={open} onClose={onClose} title={initial ? initial.company : 'Nova prospecção'}>
@@ -92,6 +106,41 @@ export default function ParceriasModal({ open, onClose, onSave, onDelete, initia
               {statusOpts[1].map(([v,l]) => <option key={v} value={v}>{l}</option>)}
             </select>
           </FormRow>
+          <FormRow label="Tipo de parceria">
+            <div className="flex flex-wrap gap-2">
+              {TIPOS.map(t => (
+                <button key={t} type="button" onClick={() => toggleTag(t)}
+                  className="px-3.5 py-1.5 rounded-full text-xs transition-all"
+                  style={{
+                    border: `1px solid ${form.tags.includes(t) ? (t==='publicidade'?'var(--purple)':t==='permuta'?'var(--teal)':t==='seeding'?'var(--amber)':'var(--border2)') : 'var(--border2)'}`,
+                    background: form.tags.includes(t) ? (t==='publicidade'?'var(--purple-bg)':t==='permuta'?'var(--teal-bg)':t==='seeding'?'var(--amber-bg)':'var(--bg4)') : 'transparent',
+                    color: form.tags.includes(t) ? (t==='publicidade'?'var(--purple)':t==='permuta'?'var(--teal)':t==='seeding'?'var(--amber)':'var(--text)') : 'var(--text2)',
+                    cursor: 'pointer',
+                  }}>
+                  {t.charAt(0).toUpperCase() + t.slice(1)}
+                </button>
+              ))}
+            </div>
+          </FormRow>
+          <FormRow label="Modo de prospecção">
+            <div className="flex gap-2">
+              {MODOS.map(m => (
+                <button key={m.v} type="button" onClick={() => set('modo', form.modo === m.v ? null : m.v)}
+                  className="px-3.5 py-1.5 rounded-full text-xs transition-all"
+                  style={{
+                    border: `1px solid ${form.modo === m.v ? (m.v==='ativa'?'#4ade80':'#c084fc') : 'var(--border2)'}`,
+                    background: form.modo === m.v ? (m.v==='ativa'?'#0e2010':'#1a0e28') : 'transparent',
+                    color: form.modo === m.v ? (m.v==='ativa'?'#4ade80':'#c084fc') : 'var(--text2)',
+                    cursor: 'pointer',
+                  }}>
+                  {m.label}
+                </button>
+              ))}
+            </div>
+          </FormRow>
+          <FormRow label="Observações">
+            <textarea className="form-input resize-y" rows={3} value={form.notes} onChange={e => set('notes', e.target.value)} placeholder="Anotações, histórico..." />
+          </FormRow>
         </>
       )}
 
@@ -128,54 +177,49 @@ export default function ParceriasModal({ open, onClose, onSave, onDelete, initia
         </>
       )}
 
-      {/* Tipo */}
-      <FormRow label="Tipo de parceria">
-        <div className="flex flex-wrap gap-2">
-          {TIPOS.map(t => (
-            <button key={t} type="button"
-              onClick={() => toggleTag(t)}
-              className="px-3.5 py-1.5 rounded-full text-xs transition-all"
-              style={{
-                border: `1px solid ${form.tags.includes(t) ? (t==='publicidade'?'var(--purple)':t==='permuta'?'var(--teal)':t==='seeding'?'var(--amber)':'var(--border2)') : 'var(--border2)'}`,
-                background: form.tags.includes(t) ? (t==='publicidade'?'var(--purple-bg)':t==='permuta'?'var(--teal-bg)':t==='seeding'?'var(--amber-bg)':'var(--bg4)') : 'transparent',
-                color: form.tags.includes(t) ? (t==='publicidade'?'var(--purple)':t==='permuta'?'var(--teal)':t==='seeding'?'var(--amber)':'var(--text)') : 'var(--text2)',
-                cursor: 'pointer',
-              }}>
-              {t.charAt(0).toUpperCase() + t.slice(1)}
-            </button>
-          ))}
-        </div>
-      </FormRow>
+      {/* ── Vinculações ── */}
+      {initial?.id && (
+        <div className="mt-6 pt-5" style={{ borderTop: '1px solid var(--border)' }}>
+          <div className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text3)' }}>
+            🔗 Vinculações
+          </div>
 
-      {/* Modo */}
-      <FormRow label="Modo de prospecção">
-        <div className="flex gap-2">
-          {MODOS.map(m => (
-            <button key={m.v} type="button"
-              onClick={() => set('modo', form.modo === m.v ? null : m.v)}
-              className="px-3.5 py-1.5 rounded-full text-xs transition-all"
-              style={{
-                border: `1px solid ${form.modo === m.v ? (m.v==='ativa'?'#4ade80':'#c084fc') : 'var(--border2)'}`,
-                background: form.modo === m.v ? (m.v==='ativa'?'#0e2010':'#1a0e28') : 'transparent',
-                color: form.modo === m.v ? (m.v==='ativa'?'#4ade80':'#c084fc') : 'var(--text2)',
-                cursor: 'pointer',
-              }}>
-              {m.label}
-            </button>
-          ))}
-        </div>
-      </FormRow>
+          {/* Conteúdos vinculados */}
+          <div className="mb-4">
+            <div className="text-xs mb-2" style={{ color: 'var(--text2)' }}>📅 Conteúdos</div>
+            {conteudos.length === 0
+              ? <p className="text-xs" style={{ color: 'var(--text3)' }}>Nenhum conteúdo vinculado — abra um conteúdo e selecione esta parceria</p>
+              : conteudos.map(c => (
+                  <div key={c.id} className="flex items-center gap-2 py-2 px-3 rounded-lg mb-1.5" style={{ background: 'var(--bg3)' }}>
+                    <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: statusColor[c.status] || '#888' }} />
+                    <span className="text-xs flex-1 truncate" style={{ color: 'var(--text)' }}>{c.titulo || 'Sem título'}</span>
+                    {c.data_publicacao && <span className="text-[10px]" style={{ color: 'var(--text3)' }}>{c.data_publicacao.split('-').slice(1).reverse().join('/')}</span>}
+                  </div>
+                ))
+            }
+          </div>
 
-      {/* Observações */}
-      <FormRow label="Observações">
-        <textarea className="form-input resize-y" rows={3} value={form.notes} onChange={e => set('notes', e.target.value)} placeholder="Anotações, histórico..." />
-      </FormRow>
+          {/* Financeiro vinculado */}
+          <div>
+            <div className="text-xs mb-2" style={{ color: 'var(--text2)' }}>💰 Financeiro</div>
+            {financeiro.length === 0
+              ? <p className="text-xs" style={{ color: 'var(--text3)' }}>Nenhuma transação vinculada — abra uma transação e selecione esta parceria</p>
+              : financeiro.map(f => (
+                  <div key={f.id} className="flex items-center gap-2 py-2 px-3 rounded-lg mb-1.5" style={{ background: 'var(--bg3)' }}>
+                    <span className="text-xs">{f.tipo === 'entrada' ? '📥' : '📤'}</span>
+                    <span className="text-xs flex-1 truncate" style={{ color: 'var(--text)' }}>{f.descricao || '—'}</span>
+                    <span className="text-xs font-semibold" style={{ color: f.tipo === 'entrada' ? 'var(--green)' : 'var(--coral)' }}>
+                      R${Number(f.valor).toLocaleString('pt-BR')}
+                    </span>
+                  </div>
+                ))
+            }
+          </div>
+        </div>
+      )}
 
       <ModalActions onClose={onClose} onDelete={initial ? onDelete : null} saving={saving} onClick={handleSave} />
-      {/* ModalActions precisa do onClick passado direto */}
-      <div className="hidden">
-        <button onClick={handleSave} id="__save-trigger" />
-      </div>
+      <div className="hidden"><button onClick={handleSave} id="__save-trigger" /></div>
     </Modal>
   )
 }

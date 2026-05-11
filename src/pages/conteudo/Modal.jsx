@@ -1,20 +1,29 @@
 import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabase'
 import Modal, { FormRow, FormGrid } from '@/components/Modal'
 import { RESPONSAVEIS } from '@/lib/constants'
 
-const EMPTY = { titulo:'', status:'planejado', data_publicacao:'', rede_social:'', formato:'', tipo_conteudo:'', responsavel:'', campanha:'', tags:[], link:'', legenda:'', observacoes:'' }
+const EMPTY = { titulo:'', status:'planejado', data_publicacao:'', rede_social:'', formato:'', tipo_conteudo:'', responsavel:'', campanha:'', tags:[], link:'', legenda:'', observacoes:'', prospect_id:'' }
 
 export default function CnModal({ open, onClose, onSave, onDelete, onDuplicate, initial }) {
-  const [form,   setForm]   = useState(EMPTY)
-  const [saving, setSaving] = useState(false)
-  const [errors, setErrors] = useState({})
+  const [form,      setForm]      = useState(EMPTY)
+  const [saving,    setSaving]    = useState(false)
+  const [errors,    setErrors]    = useState({})
+  const [prospects, setProspects] = useState([])
 
   useEffect(() => {
     if (open) {
-      setForm(initial ? { ...EMPTY, ...initial, tags: initial.tags||[] } : EMPTY)
+      setForm(initial ? { ...EMPTY, ...initial, tags: initial.tags||[], prospect_id: initial.prospect_id||'' } : EMPTY)
       setErrors({})
     }
   }, [open, initial])
+
+  useEffect(() => {
+    if (open) {
+      supabase.from('prospects').select('id,company').neq('status','perdido').order('company')
+        .then(({ data }) => setProspects(data || []))
+    }
+  }, [open])
 
   const set = (k,v) => { setForm(f=>({...f,[k]:v})); setErrors(e=>({...e,[k]:''})) }
   const toggleTag = t => setForm(f=>({ ...f, tags: f.tags.includes(t)?f.tags.filter(x=>x!==t):[...f.tags,t] }))
@@ -26,6 +35,7 @@ export default function CnModal({ open, onClose, onSave, onDelete, onDuplicate, 
     setSaving(true)
     await onSave({
       ...form,
+      prospect_id: form.prospect_id || null,
       tags: typeof form.tags === 'string' ? form.tags.split(',').map(t=>t.trim()).filter(Boolean) : form.tags,
     })
     setSaving(false)
@@ -37,7 +47,6 @@ export default function CnModal({ open, onClose, onSave, onDelete, onDuplicate, 
         <input className={`form-input${errors.titulo?' border-[var(--coral)]':''}`} value={form.titulo} onChange={e=>set('titulo',e.target.value)} placeholder="Ex: Rotina matinal — Reels" />
         {errors.titulo && <p className="text-xs mt-1" style={{ color:'var(--coral)' }}>{errors.titulo}</p>}
       </FormRow>
-
       <FormGrid>
         <FormRow label="Status">
           <select className="form-input" style={{ appearance:'none' }} value={form.status} onChange={e=>set('status',e.target.value)}>
@@ -53,7 +62,6 @@ export default function CnModal({ open, onClose, onSave, onDelete, onDuplicate, 
           <input className="form-input" type="date" value={form.data_publicacao} onChange={e=>set('data_publicacao',e.target.value)} />
         </FormRow>
       </FormGrid>
-
       <FormGrid>
         <FormRow label="Rede Social">
           <select className="form-input" style={{ appearance:'none' }} value={form.rede_social} onChange={e=>set('rede_social',e.target.value)}>
@@ -72,7 +80,6 @@ export default function CnModal({ open, onClose, onSave, onDelete, onDuplicate, 
           </select>
         </FormRow>
       </FormGrid>
-
       <FormGrid>
         <FormRow label="Tipo de conteúdo">
           <select className="form-input" style={{ appearance:'none' }} value={form.tipo_conteudo} onChange={e=>set('tipo_conteudo',e.target.value)}>
@@ -91,7 +98,6 @@ export default function CnModal({ open, onClose, onSave, onDelete, onDuplicate, 
           </select>
         </FormRow>
       </FormGrid>
-
       <FormGrid>
         <FormRow label="Campanha / Série">
           <input className="form-input" value={form.campanha} onChange={e=>set('campanha',e.target.value)} placeholder="Ex: Campanha Verão 2025" />
@@ -101,14 +107,20 @@ export default function CnModal({ open, onClose, onSave, onDelete, onDuplicate, 
         </FormRow>
       </FormGrid>
 
+      {/* Vinculação com parceria */}
+      <FormRow label="🔗 Vincular à parceria">
+        <select className="form-input" style={{ appearance:'none' }} value={form.prospect_id} onChange={e=>set('prospect_id',e.target.value)}>
+          <option value="">— Nenhuma —</option>
+          {prospects.map(p => <option key={p.id} value={p.id}>{p.company}</option>)}
+        </select>
+      </FormRow>
+
       <FormRow label="Link do conteúdo">
         <input className="form-input" value={form.link} onChange={e=>set('link',e.target.value)} placeholder="https://..." />
       </FormRow>
-
       <FormRow label="Legenda / Caption">
         <textarea className="form-input resize-y" rows={2} value={form.legenda} onChange={e=>set('legenda',e.target.value)} placeholder="Escreva a legenda do post..." />
       </FormRow>
-
       <FormRow label="Observações e referências">
         <textarea className="form-input resize-y" rows={3} value={form.observacoes} onChange={e=>set('observacoes',e.target.value)} />
       </FormRow>

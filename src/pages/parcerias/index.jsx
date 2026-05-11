@@ -65,7 +65,7 @@ export default function ParceriasPage() {
     } catch(e) { toast.error('Erro: ' + e.message) }
   }
 
-  const viewProps = { prospects: filtered, allProspects: prospects, onEdit: openEdit }
+const viewProps = { prospects: filtered, allProspects: prospects, onEdit: openEdit, onSave: save }
 
   return (
     <div className="flex" style={{ minHeight: '100vh' }}>

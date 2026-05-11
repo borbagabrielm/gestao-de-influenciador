@@ -1,8 +1,8 @@
 // ── Responsáveis ──
 export const RESPONSAVEIS = {
-  Nico:  { color: '#c8f043', photo: 'https://instagram.fpoa13-1.fna.fbcdn.net/v/t51.82787-19/683090406_18581886565022230_4043454797942534839_n.jpg?stp=dst-jpg_s150x150_tt6&_nc_ht=instagram.fpoa13-1.fna.fbcdn.net&_nc_cat=110&ccb=7-5' },
-  Gabe:  { color: '#9b6dff', photo: 'https://instagram.fpoa13-1.fna.fbcdn.net/v/t51.82787-19/671117195_18578700337004536_5136776709204820303_n.jpg?stp=dst-jpg_s150x150_tt6&_nc_ht=instagram.fpoa13-1.fna.fbcdn.net&_nc_cat=104&ccb=7-5' },
-  Erika: { color: '#f472b6', photo: 'https://instagram.fpoa13-1.fna.fbcdn.net/v/t51.2885-19/330362837_576657751193342_8437573667664803139_n.jpg?stp=dst-jpg_s150x150_tt6&_nc_ht=instagram.fpoa13-1.fna.fbcdn.net&_nc_cat=102&ccb=7-5' },
+  Nico:  { color: '#c8f043', photo: 'https://rciywgiuktjipcjtmrzw.supabase.co/storage/v1/object/public/avatars/nico.jpg'  },
+  Gabe:  { color: '#9b6dff', photo: 'https://rciywgiuktjipcjtmrzw.supabase.co/storage/v1/object/public/avatars/gabe.jpg'  },
+  Erika: { color: '#f472b6', photo: 'https://rciywgiuktjipcjtmrzw.supabase.co/storage/v1/object/public/avatars/erika.jpg' },
 }
 
 // ── Parcerias ──

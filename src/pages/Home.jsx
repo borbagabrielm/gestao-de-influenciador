@@ -1,10 +1,8 @@
-import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import ThemeToggle from '@/components/ThemeToggle'
 import DailyAlerts from '@/components/DailyAlerts'
 import GlobalSearch from '@/components/GlobalSearch'
-import { supabase } from '@/lib/supabase'
 
 const AREAS = [
   {
@@ -36,43 +34,8 @@ const AREAS = [
 export default function HomePage() {
   const { user, logout } = useAuth()
   const nav = useNavigate()
-  const [summary, setSummary] = useState(null)
-
-  const name = user?.email?.split('@')[0] || ''
+  const name     = user?.email?.split('@')[0] || ''
   const initials = user?.email?.slice(0, 2).toUpperCase() || '?'
-
-  useEffect(() => {
-    const load = async () => {
-      const today = new Date().toISOString().split('T')[0]
-      const thisMonth = today.slice(0, 7)
-
-      const [p, c, f] = await Promise.all([
-        supabase.from('prospects').select('id,status,phase,value').neq('status','perdido'),
-        supabase.from('conteudos').select('id,status,data_publicacao').neq('status','arquivado'),
-        supabase.from('financeiro').select('id,tipo,valor,status_pgto,data').gte('data', thisMonth + '-01'),
-      ])
-
-      const prospects = p.data || []
-      const conteudos = c.data || []
-      const fin       = f.data || []
-
-      setSummary({
-        parcerias: {
-          negociacao: prospects.filter(x => x.phase === 1 && ['negociacao','proposta'].includes(x.status)).length,
-          total: prospects.length,
-        },
-        conteudo: {
-          semana: conteudos.filter(x => x.data_publicacao >= today && x.data_publicacao <= new Date(Date.now()+6*86400000).toISOString().split('T')[0]).length,
-          total:  conteudos.length,
-        },
-        financeiro: {
-          receita: fin.filter(x => x.tipo==='entrada' && x.status_pgto==='confirmado').reduce((s,x) => s+x.valor, 0),
-          pendente: fin.filter(x => x.tipo==='entrada' && x.status_pgto==='pendente').reduce((s,x) => s+x.valor, 0),
-        },
-      })
-    }
-    load()
-  }, [])
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
@@ -84,7 +47,8 @@ export default function HomePage() {
           <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-black" style={{ background: 'var(--accent)' }}>{initials}</div>
           <span className="text-xs" style={{ color: 'var(--text2)' }}>{name}</span>
           <button onClick={logout} className="text-xs ml-1 transition-colors" style={{ background: 'none', border: 'none', color: 'var(--text3)', cursor: 'pointer' }}
-            onMouseEnter={e=>e.target.style.color='var(--coral)'} onMouseLeave={e=>e.target.style.color='var(--text3)'}>
+            onMouseEnter={e => e.target.style.color = 'var(--coral)'}
+            onMouseLeave={e => e.target.style.color = 'var(--text3)'}>
             Sair
           </button>
         </div>
@@ -99,40 +63,19 @@ export default function HomePage() {
           <p className="text-base" style={{ color: 'var(--text2)' }}>Selecione uma área para começar</p>
         </div>
 
-        <div className="w-full max-w-3xl">
+        <div className="w-full max-w-4xl">
           {/* Alertas do dia */}
           <DailyAlerts />
 
-          {/* Resumo executivo */}
-          {summary && (
-            <div className="grid grid-cols-3 gap-3 mb-6">
-              <div className="stat-card text-center">
-                <div className="text-xs uppercase tracking-wider mb-1" style={{ color: 'var(--text3)' }}>Em negociação</div>
-                <div className="font-title font-bold text-2xl" style={{ color: 'var(--amber)' }}>{summary.parcerias.negociacao}</div>
-                <div className="text-xs mt-1" style={{ color: 'var(--text3)' }}>parcerias</div>
-              </div>
-              <div className="stat-card text-center">
-                <div className="text-xs uppercase tracking-wider mb-1" style={{ color: 'var(--text3)' }}>Receita do mês</div>
-                <div className="font-title font-bold text-2xl" style={{ color: 'var(--green)' }}>R${(summary.financeiro.receita/1000).toFixed(1)}k</div>
-                <div className="text-xs mt-1" style={{ color: 'var(--text3)' }}>confirmado</div>
-              </div>
-              <div className="stat-card text-center">
-                <div className="text-xs uppercase tracking-wider mb-1" style={{ color: 'var(--text3)' }}>Conteúdos</div>
-                <div className="font-title font-bold text-2xl" style={{ color: 'var(--purple)' }}>{summary.conteudo.semana}</div>
-                <div className="text-xs mt-1" style={{ color: 'var(--text3)' }}>esta semana</div>
-              </div>
-            </div>
-          )}
-
-          {/* Cards de área */}
-          <div className="flex gap-5 flex-wrap justify-center">
+          {/* Cards de área — todos na mesma linha */}
+          <div className="flex gap-5 justify-center flex-wrap">
             {AREAS.map(area => (
               <div key={area.path}
                 onClick={() => nav(area.path)}
-                className="rounded-2xl p-8 cursor-pointer transition-all duration-200"
-                style={{ background: 'var(--bg2)', border: '1px solid var(--border)', width: 260 }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor='var(--border2)'; e.currentTarget.style.transform='translateY(-4px)'; e.currentTarget.style.boxShadow='0 20px 60px rgba(0,0,0,.3)' }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor='var(--border)'; e.currentTarget.style.transform=''; e.currentTarget.style.boxShadow='' }}
+                className="rounded-2xl p-8 cursor-pointer transition-all duration-200 flex-1"
+                style={{ background: 'var(--bg2)', border: '1px solid var(--border)', minWidth: 220, maxWidth: 300 }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--border2)'; e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 20px 60px rgba(0,0,0,.3)' }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)';  e.currentTarget.style.transform = '';               e.currentTarget.style.boxShadow = '' }}
               >
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-5" style={{ background: area.iconBg }}>{area.icon}</div>
                 <div className="font-title font-bold text-lg mb-2" style={{ color: 'var(--text)' }}>{area.title}</div>

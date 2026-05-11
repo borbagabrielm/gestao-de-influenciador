@@ -32,6 +32,7 @@ const toDB = (d, userId) => ({
   campanha: d.campanha || '',
   tags: d.tags || [],
   updated_at: new Date().toISOString(),
+  prospect_id: d.prospect_id || null,
 })
 
 export function useConteudos() {

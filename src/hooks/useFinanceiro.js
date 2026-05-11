@@ -26,6 +26,7 @@ const toDB = (d, userId) => ({
   tags: d.tags || [],
   notes: d.notes || '',
   updated_at: new Date().toISOString(),
+  prospect_id: d.prospect_id || null,
 })
 
 export function useFinanceiro() {
