@@ -4,7 +4,7 @@ import Sidebar, { SidebarSection, SidebarItem } from '@/components/Sidebar'
 import MetricasDashboard from './Dashboard'
 import MetricasTabela    from './Tabela'
 import MetricasImportar  from './Importar'
-import { PLAT_COLOR, FMT_COLOR } from './shared'
+import { PLAT_COLOR, FMT_COLOR } from './shared.js'
 
 export default function MetricasPage() {
   const [view,     setView]     = useState('dashboard')

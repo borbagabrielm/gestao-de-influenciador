@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { fmtN, fmtDate, PLAT_COLOR, FMT_COLOR } from './shared'
+import { fmtN, fmtDate, PLAT_COLOR, FMT_COLOR } from './shared.js'
 
 // ── Sparkline simples ─────────────────────────────────────
 function Sparkline({ data, color, width = 80, height = 32 }) {

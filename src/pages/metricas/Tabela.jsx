@@ -1,4 +1,4 @@
-import { fmtN, fmtDate, PLAT_COLOR } from './shared'
+import { fmtN, fmtDate, PLAT_COLOR } from './shared.js'
 
 export default function MetricasTabela({ sortedTable, sortCol, sortDir, onSort }) {
   const Th = ({ col, children }) => (

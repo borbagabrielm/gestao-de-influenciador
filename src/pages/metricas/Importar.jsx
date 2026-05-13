@@ -1,5 +1,5 @@
 import Papa from 'papaparse'
-import { fmtN, PLAT_COLOR, parseInstagram, parseTikTok, detectPlataforma } from './shared'
+import { fmtN, PLAT_COLOR, parseInstagram, parseTikTok, detectPlataforma } from './shared.js'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/contexts/ToastContext'
 import { useState } from 'react'
