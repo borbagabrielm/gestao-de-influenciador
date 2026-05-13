@@ -21,14 +21,14 @@ export default function ParceriasKanban({ prospects, onEdit, onSave }) {
   let _dragId = null
   let _overCol = null
 
-  const handleDrop = async (newStatus, prospect) => {
-    if (!prospect || prospect.status === newStatus) return
-    try {
-      await onSave({ ...prospect, status: newStatus }, prospect.id)
-    } catch(e) {
-      toast.error('Erro ao mover card: ' + e.message)
-    }
+const handleDrop = async (newStatus, prospect) => {
+  if (!prospect || prospect.status === newStatus) return
+  try {
+    await onSave({ ...prospect, status: newStatus }, prospect.id)
+  } catch(e) {
+    toast.error('Erro ao mover card: ' + e.message)
   }
+}
 
   return (
     <>

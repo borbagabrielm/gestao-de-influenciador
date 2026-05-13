@@ -29,6 +29,14 @@ const AREAS = [
     desc: 'Calendário, kanban de produção e banco de ideias.',
     tags: ['Calendário', 'Kanban', 'Banco de Ideias', 'Dashboard'],
   },
+  {
+  path: '/metricas',
+  icon: '📊',
+  iconBg: 'var(--purple-bg)',
+  title: 'Métricas de Performance',
+  desc: 'Importe e acompanhe performance de posts do Instagram e TikTok.',
+  tags: ['Instagram', 'TikTok', 'Importação CSV', 'Histórico'],
+},
 ]
 
 export default function HomePage() {
@@ -67,27 +75,27 @@ export default function HomePage() {
           {/* Alertas do dia */}
           <DailyAlerts />
 
-          {/* Cards de área — todos na mesma linha */}
-          <div className="flex gap-5 justify-center flex-wrap">
-            {AREAS.map(area => (
-              <div key={area.path}
-                onClick={() => nav(area.path)}
-                className="rounded-2xl p-8 cursor-pointer transition-all duration-200 flex-1"
-                style={{ background: 'var(--bg2)', border: '1px solid var(--border)', minWidth: 220, maxWidth: 300 }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--border2)'; e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 20px 60px rgba(0,0,0,.3)' }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)';  e.currentTarget.style.transform = '';               e.currentTarget.style.boxShadow = '' }}
-              >
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-5" style={{ background: area.iconBg }}>{area.icon}</div>
-                <div className="font-title font-bold text-lg mb-2" style={{ color: 'var(--text)' }}>{area.title}</div>
-                <p className="text-sm mb-4 leading-relaxed" style={{ color: 'var(--text2)' }}>{area.desc}</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {area.tags.map(t => (
-                    <span key={t} className="text-[10px] px-2 py-1 rounded-md" style={{ background: 'var(--bg3)', color: 'var(--text3)' }}>{t}</span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+{/* Cards de área — todos na mesma linha */}
+<div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+  {AREAS.map(area => (
+    <div key={area.path}
+      onClick={() => nav(area.path)}
+      className="rounded-2xl p-6 cursor-pointer transition-all duration-200"
+      style={{ background: 'var(--bg2)', border: '1px solid var(--border)' }}
+      onMouseEnter={e => { e.currentTarget.style.borderColor='var(--border2)'; e.currentTarget.style.transform='translateY(-4px)'; e.currentTarget.style.boxShadow='0 20px 60px rgba(0,0,0,.3)' }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor='var(--border)';  e.currentTarget.style.transform='';               e.currentTarget.style.boxShadow='' }}
+    >
+      <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-5" style={{ background: area.iconBg }}>{area.icon}</div>
+      <div className="font-title font-bold text-lg mb-2" style={{ color: 'var(--text)' }}>{area.title}</div>
+      <p className="text-sm mb-4 leading-relaxed" style={{ color: 'var(--text2)' }}>{area.desc}</p>
+      <div className="flex flex-wrap gap-1.5">
+        {area.tags.map(t => (
+          <span key={t} className="text-[10px] px-2 py-1 rounded-md" style={{ background: 'var(--bg3)', color: 'var(--text3)' }}>{t}</span>
+        ))}
+      </div>
+    </div>
+  ))}
+</div>
         </div>
       </div>
     </div>

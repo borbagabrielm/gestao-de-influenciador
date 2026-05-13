@@ -7,6 +7,7 @@ import HomePage      from '@/pages/Home'
 import ParceriasPage from '@/pages/parcerias'
 import FinanceiroPage from '@/pages/financeiro'
 import ConteudoPage  from '@/pages/conteudo'
+import MetricasPage from '@/pages/metricas'
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth()
@@ -37,6 +38,7 @@ export default function App() {
               <Route path="/financeiro/*" element={<PrivateRoute><FinanceiroPage /></PrivateRoute>} />
               <Route path="/conteudo/*"  element={<PrivateRoute><ConteudoPage /></PrivateRoute>} />
               <Route path="*"           element={<Navigate to="/" replace />} />
+              <Route path="/metricas/*" element={<PrivateRoute><MetricasPage /></PrivateRoute>} />
             </Routes>
           </BrowserRouter>
         </ToastProvider>

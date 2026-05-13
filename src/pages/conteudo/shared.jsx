@@ -45,10 +45,45 @@ export function RespAvatar({ nome, size = 24 }) {
   )
 }
 
+export function RsIcon({ rs, size = 12 }) {
+  if (rs === 'instagram') return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="ig" cx="30%" cy="107%" r="150%">
+          <stop offset="0%" stopColor="#fdf497"/>
+          <stop offset="5%" stopColor="#fdf497"/>
+          <stop offset="45%" stopColor="#fd5949"/>
+          <stop offset="60%" stopColor="#d6249f"/>
+          <stop offset="90%" stopColor="#285AEB"/>
+        </radialGradient>
+      </defs>
+      <rect width="24" height="24" rx="6" fill="url(#ig)"/>
+      <circle cx="12" cy="12" r="4.5" stroke="white" strokeWidth="2" fill="none"/>
+      <circle cx="17.5" cy="6.5" r="1.2" fill="white"/>
+    </svg>
+  )
+  if (rs === 'tiktok') return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="24" height="24" rx="6" fill="#010101"/>
+      <path d="M17 8.5a4 4 0 01-4-4v8.5a3 3 0 11-3-3" stroke="white" strokeWidth="2" strokeLinecap="round" fill="none"/>
+      <path d="M13 4.5a4 4 0 004 4" stroke="#69C9D0" strokeWidth="2" strokeLinecap="round" fill="none"/>
+    </svg>
+  )
+  if (rs === 'youtube') return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="24" height="24" rx="6" fill="#FF0000"/>
+      <path d="M10 9l6 3-6 3V9z" fill="white"/>
+    </svg>
+  )
+  return null
+}
+
 export function MiniCard({ c, onEdit, onDragStart, onDragEnd }) {
   const si  = CN_STATUS[c.status] || CN_STATUS.planejado
   const atr = isAtrasado(c)
   const m   = c.rede_social ? RS_META[c.rede_social] : null
+
+  
 
   return (
     <div
@@ -62,7 +97,7 @@ export function MiniCard({ c, onEdit, onDragStart, onDragEnd }) {
         borderLeft: `3px solid ${atr?'var(--coral)':si.color}`,
       }}
     >
-      {m && <span className="flex-shrink-0 font-medium" style={{ color: m.color, fontSize: 9 }}>{m.label.slice(0,2)}</span>}
+      {c.rede_social && <RsIcon rs={c.rede_social} size={10} />}
       <span className="truncate flex-1" style={{ color: atr?'var(--coral)':si.color }}>{c.titulo||'Sem título'}</span>
     </div>
   )

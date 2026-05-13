@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 
 export default function DailyAlerts() {
-  const [alerts, setAlerts] = useState([])
+  const [alerts,  setAlerts]  = useState([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0]
     const load = async () => {
+      setLoading(true)
       const [p, c, f] = await Promise.all([
         supabase.from('prospects').select('id,company,status').eq('followup', today),
         supabase.from('conteudos').select('id,titulo,rede_social').eq('data_publicacao', today).neq('status','arquivado'),
@@ -18,9 +20,28 @@ export default function DailyAlerts() {
         ...(f.data||[]).map(r => ({ id:r.id, icon:'💰', color:'var(--amber)', label: r.descricao, sub: r.tipo === 'entrada' ? 'A receber hoje' : 'A pagar hoje' })),
       ]
       setAlerts(all)
+      setLoading(false)
     }
     load()
   }, [])
+
+  if (loading) return (
+    <div className="rounded-xl overflow-hidden mb-6" style={{ background: 'var(--bg2)', border: '1px solid var(--border)' }}>
+      <div className="px-4 py-3 flex items-center gap-2" style={{ borderBottom: '1px solid var(--border)' }}>
+        <span>🔔</span>
+        <span className="text-sm font-medium">Hoje</span>
+      </div>
+      {[1,2].map(i => (
+        <div key={i} className="flex items-center gap-3 px-4 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
+          <div className="skeleton rounded-full w-8 h-8 flex-shrink-0" />
+          <div className="flex-1 space-y-1.5">
+            <div className="skeleton rounded h-3 w-40" />
+            <div className="skeleton rounded h-2.5 w-24" />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
 
   if (!alerts.length) return null
 
@@ -32,7 +53,8 @@ export default function DailyAlerts() {
         <span className="ml-auto text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: 'var(--coral-bg)', color: 'var(--coral)' }}>{alerts.length}</span>
       </div>
       {alerts.map((a, i) => (
-        <div key={i} className="flex items-center gap-3 px-4 py-3" style={{ borderBottom: i < alerts.length - 1 ? '1px solid var(--border)' : 'none' }}>
+        <div key={i} className="flex items-center gap-3 px-4 py-3"
+          style={{ borderBottom: i < alerts.length - 1 ? '1px solid var(--border)' : 'none' }}>
           <span style={{ fontSize: 18 }}>{a.icon}</span>
           <div className="flex-1 min-w-0">
             <div className="text-sm font-medium truncate">{a.label}</div>

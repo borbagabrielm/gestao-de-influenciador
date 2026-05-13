@@ -15,6 +15,7 @@ const fromDB = r => ({
   responsavel: r.responsavel || '',
   campanha: r.campanha || '',
   tags: r.tags || [],
+  prospect_id: r.prospect_id || null,
 })
 
 const toDB = (d, userId) => ({

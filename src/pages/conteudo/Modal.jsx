@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Modal, { FormRow, FormGrid } from '@/components/Modal'
 import { RESPONSAVEIS } from '@/lib/constants'
+import Comentarios from '@/components/Comentarios'
 
 const EMPTY = { titulo:'', status:'planejado', data_publicacao:'', rede_social:'', formato:'', tipo_conteudo:'', responsavel:'', campanha:'', tags:[], link:'', legenda:'', observacoes:'', prospect_id:'' }
 
@@ -124,6 +125,8 @@ export default function CnModal({ open, onClose, onSave, onDelete, onDuplicate, 
       <FormRow label="Observações e referências">
         <textarea className="form-input resize-y" rows={3} value={form.observacoes} onChange={e=>set('observacoes',e.target.value)} />
       </FormRow>
+
+      <Comentarios tipo="conteudo" refId={initial?.id} />
 
       <div className="flex gap-2.5 mt-6 items-center">
         {onDelete    && <button className="btn-danger" onClick={onDelete}>Excluir</button>}

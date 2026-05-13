@@ -12,6 +12,7 @@ const fromDB = r => ({
   statusPgto: r.status_pgto || 'confirmado',
   tags: r.tags || [],
   notes: r.notes || '',
+  prospect_id: r.prospect_id || null,
 })
 
 const toDB = (d, userId) => ({

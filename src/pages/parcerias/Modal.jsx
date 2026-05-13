@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Modal, { FormRow, FormGrid, ModalActions } from '@/components/Modal'
+import Comentarios from '@/components/Comentarios'
 
 const EMPTY = { company:'', contact:'', email:'', value:'', followup:'', notes:'', pubdate:'', pgtoDate:'', finalValue:'', tags:[], modo:null, phase:1, status:'lead', statusHistory:[] }
 const TIPOS = ['publicidade','permuta','seeding','collab','embaixadora']
@@ -217,6 +218,8 @@ export default function ParceriasModal({ open, onClose, onSave, onDelete, initia
           </div>
         </div>
       )}
+
+      <Comentarios tipo="parceria" refId={initial?.id} />
 
       <ModalActions onClose={onClose} onDelete={initial ? onDelete : null} saving={saving} onClick={handleSave} />
       <div className="hidden"><button onClick={handleSave} id="__save-trigger" /></div>
