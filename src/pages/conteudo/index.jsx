@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useConteudos } from '@/hooks/useConteudos'
 import { useToast } from '@/contexts/ToastContext'
 import Sidebar, { SidebarSection, SidebarItem } from '@/components/Sidebar'
@@ -10,6 +10,8 @@ import CnKanban     from './Kanban'
 import CnBacklog    from './Backlog'
 import CnDashboard  from './Dashboard'
 import CnModal      from './Modal'
+import { useIsMobile } from '@/hooks/useIsMobile'
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { CN_STATUS } from '@/lib/constants'
 
 const VIEWS = [
@@ -32,6 +34,11 @@ export default function ConteudoPage() {
   const [showAtr,  setShowAtr]  = useState(false)
   const [modal,    setModal]    = useState(false)
   const [editing,  setEditing]  = useState(null)
+  const [datePreset, setDatePreset] = useState(null)
+
+  useKeyboardShortcuts([
+  { key: 'n', action: () => openNew() },
+])
 
   const filtered = conteudos.filter(c => {
     if (filters.rs   !== 'all' && c.rede_social   !== filters.rs)   return false
@@ -89,6 +96,24 @@ export default function ConteudoPage() {
   const viewProps = { conteudos: filtered, allConteudos: conteudos, onEdit: openEdit, onDrop: handleDrop }
   const isCalView = view === 'cal-mes' || view === 'cal-sem'
 
+useEffect(() => {
+  if (loading) return
+  if (window.__openItem?.type === 'conteudo') {
+    const item = conteudos.find(c => c.id === window.__openItem.id)
+    if (item) { setEditing(item); setModal(true); window.__openItem = null }
+  }
+  const handler = (e) => {
+    if (e.detail?.type === 'conteudo') {
+      const item = conteudos.find(c => c.id === e.detail.id)
+      if (item) { setEditing(item); setModal(true) }
+    }
+  }
+  window.addEventListener('open-item', handler)
+  return () => window.removeEventListener('open-item', handler)
+}, [conteudos, loading])
+
+const isMobile = useIsMobile()
+
   return (
     <div className="flex" style={{ minHeight: '100vh' }}>
       <Sidebar title="Conteúdo" subtitle="C" accentColor="var(--purple)">
@@ -115,7 +140,12 @@ export default function ConteudoPage() {
 
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Topbar */}
-        <div className="h-[60px] flex items-center gap-2.5 px-5 flex-shrink-0" style={{ borderBottom:'1px solid var(--border)', background:'var(--bg)' }}>
+        <div className="h-[60px] flex items-center gap-2.5 px-5 flex-shrink-0"
+  style={{
+    borderBottom: '1px solid var(--border)',
+    background: 'var(--bg)',
+    paddingLeft: isMobile ? 64 : 20,
+  }}>
           <span className="font-title font-bold text-lg flex-1">{VIEWS.find(v=>v.id===view)?.label}</span>
           <GlobalSearch />
           <select className="form-input text-xs py-1 px-2" style={{ width:'auto' }} value={formato} onChange={e=>setFormato(e.target.value)}>
@@ -149,7 +179,11 @@ export default function ConteudoPage() {
         <div className="flex-1 overflow-y-auto p-5">
           {loading ? <><SkeletonStats count={5}/><SkeletonKanban cols={5}/></> : (
             <>
-              {view==='cal-mes'   && <CnCalMensal  {...viewProps} />}
+              {view==='cal-mes' && <CnCalMensal {...viewProps} onNewItem={date => {
+  setEditing(null)
+  setDatePreset(date)
+  setModal(true)
+}} />}
               {view==='cal-sem'   && <CnCalSemanal {...viewProps} />}
               {view==='kanban'    && <CnKanban     {...viewProps} />}
               {view==='backlog'   && <CnBacklog    {...viewProps} />}
@@ -161,11 +195,11 @@ export default function ConteudoPage() {
 
       <CnModal
         open={modal}
-        onClose={() => setModal(false)}
+        onClose={() => { setModal(false); setDatePreset(null) }}
         onSave={handleSave}
         onDelete={editing ? () => handleDelete(editing.id) : null}
         onDuplicate={editing ? () => handleDuplicate(editing.id) : null}
-        initial={editing}
+        initial={editing ?? (datePreset ? { data_publicacao: datePreset } : null)}
       />
     </div>
   )

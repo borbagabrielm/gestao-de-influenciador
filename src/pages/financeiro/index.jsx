@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useFinanceiro } from '@/hooks/useFinanceiro'
 import { useToast } from '@/contexts/ToastContext'
 import Sidebar, { SidebarSection, SidebarItem } from '@/components/Sidebar'
@@ -8,6 +8,8 @@ import FinDashboard from './Dashboard'
 import FinExtrato   from './Extrato'
 import FinTabela    from './Tabela'
 import FinModal     from './Modal'
+import { useIsMobile } from '@/hooks/useIsMobile'
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { F_STATUS } from '@/lib/constants'
 
 const VIEWS = [
@@ -28,6 +30,11 @@ export default function FinanceiroPage() {
   const [modal,   setModal]   = useState(false)
   const [editing, setEditing] = useState(null)
   const [tipoNew, setTipoNew] = useState('entrada')
+
+  useKeyboardShortcuts([
+  { key: 'e', action: () => openNew('entrada') },
+  { key: 's', action: () => openNew('saida') },
+])
 
   const today    = new Date()
   const isoToday = today.toISOString().split('T')[0]
@@ -70,6 +77,24 @@ export default function FinanceiroPage() {
 
   const viewProps = { financeiro: filtered, allFinanceiro: financeiro, onEdit: openEdit }
 
+useEffect(() => {
+  if (loading) return
+  if (window.__openItem?.type === 'financeiro') {
+    const item = financeiro.find(t => t.id === window.__openItem.id)
+    if (item) { setEditing(item); setModal(true); window.__openItem = null }
+  }
+  const handler = (e) => {
+    if (e.detail?.type === 'financeiro') {
+      const item = financeiro.find(t => t.id === e.detail.id)
+      if (item) { setEditing(item); setModal(true) }
+    }
+  }
+  window.addEventListener('open-item', handler)
+  return () => window.removeEventListener('open-item', handler)
+}, [financeiro, loading])
+
+const isMobile = useIsMobile()
+
   return (
     <div className="flex" style={{ minHeight: '100vh' }}>
       <Sidebar title="Financeiro" subtitle="F" accentColor="var(--teal)">
@@ -97,7 +122,12 @@ export default function FinanceiroPage() {
       </Sidebar>
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="h-[60px] flex items-center gap-2.5 px-5 flex-shrink-0" style={{ borderBottom: '1px solid var(--border)', background: 'var(--bg)' }}>
+        <div className="h-[60px] flex items-center gap-2.5 px-5 flex-shrink-0"
+  style={{
+    borderBottom: '1px solid var(--border)',
+    background: 'var(--bg)',
+    paddingLeft: isMobile ? 64 : 20,
+  }}>
           <span className="font-title font-bold text-lg flex-1">{VIEWS.find(v=>v.id===view)?.label}</span>
           <GlobalSearch />
           <button className="btn-new flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-lg"

@@ -90,7 +90,7 @@ export function MiniCard({ c, onEdit, onDragStart, onDragEnd }) {
       draggable
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
-      onClick={() => onEdit(c.id)}
+      onClick={e => { e.stopPropagation(); onEdit(c.id) }}
       className="text-[10px] px-1.5 py-1 rounded-md mb-1 cursor-grab flex items-center gap-1 overflow-hidden"
       style={{
         background: si.bg,

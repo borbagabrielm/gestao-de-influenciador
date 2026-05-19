@@ -4,6 +4,8 @@ import Sidebar, { SidebarSection, SidebarItem } from '@/components/Sidebar'
 import MetricasDashboard from './Dashboard'
 import MetricasTabela    from './Tabela'
 import MetricasImportar  from './Importar'
+import MetricasSeguidores from './Seguidores.jsx'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import { PLAT_COLOR, FMT_COLOR } from './shared.js'
 
 export default function MetricasPage() {
@@ -108,12 +110,15 @@ export default function MetricasPage() {
     else { setSortCol(col); setSortDir(-1) }
   }
 
+  const isMobile = useIsMobile()
+
   return (
     <div className="flex" style={{ minHeight: '100vh' }}>
       <Sidebar title="Métricas" subtitle="M" accentColor="var(--purple)">
         <SidebarSection label="Menu">
           <SidebarItem active={view === 'dashboard'} onClick={() => setView('dashboard')}>📊 Dashboard</SidebarItem>
           <SidebarItem active={view === 'tabela'}    onClick={() => setView('tabela')}>📋 Tabela completa</SidebarItem>
+          <SidebarItem active={view === 'seguidores'} onClick={() => setView('seguidores')}>👥 Seguidores</SidebarItem>
           <SidebarItem active={view === 'importar'}  onClick={() => setView('importar')}>📥 Importar CSV</SidebarItem>
         </SidebarSection>
         <SidebarSection label="Plataforma">
@@ -139,9 +144,13 @@ export default function MetricasPage() {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Topbar */}
         <div className="h-[60px] flex items-center gap-2.5 px-5 flex-shrink-0"
-          style={{ borderBottom: '1px solid var(--border)', background: 'var(--bg)' }}>
+  style={{
+    borderBottom: '1px solid var(--border)',
+    background: 'var(--bg)',
+    paddingLeft: isMobile ? 64 : 20,
+  }}>
           <span className="font-title font-bold text-lg flex-1">
-            {view === 'dashboard' ? 'Dashboard de Métricas' : view === 'tabela' ? 'Tabela Completa' : 'Importar CSV'}
+            {view === 'dashboard' ? 'Dashboard de Métricas' : view === 'tabela' ? 'Tabela Completa' : view === 'seguidores' ? 'Seguidores' : 'Importar CSV'}
           </span>
           {(view === 'dashboard' || view === 'tabela') && (
             <>
@@ -186,6 +195,8 @@ export default function MetricasPage() {
           {view === 'importar' && (
             <MetricasImportar onImportSuccess={loadMetricas} />
           )}
+
+          {view === 'seguidores' && <MetricasSeguidores />}
         </div>
       </div>
     </div>

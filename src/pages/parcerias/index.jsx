@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useProspects } from '@/hooks/useProspects'
 import { useToast } from '@/contexts/ToastContext'
 import Sidebar, { SidebarSection, SidebarItem } from '@/components/Sidebar'
@@ -10,6 +10,8 @@ import ParceriasPipeline from './Pipeline'
 import ParceriasCalendar from './Calendar'
 import ParceriasDatabase from './Database'
 import ParceriasModal    from './Modal'
+import { useIsMobile } from '@/hooks/useIsMobile'
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { P_PHASES } from '@/lib/constants'
 
 const VIEWS = [
@@ -30,6 +32,11 @@ export default function ParceriasPage() {
   const [search,  setSearch]  = useState('')
   const [modal,   setModal]   = useState(false)
   const [editing, setEditing] = useState(null)
+  const [datePreset, setDatePreset] = useState(null)
+
+  useKeyboardShortcuts([
+  { key: 'n', action: () => openNew() },
+])
 
   // ── filtros ──
   const filtered = prospects.filter(p => {
@@ -67,6 +74,25 @@ export default function ParceriasPage() {
 
 const viewProps = { prospects: filtered, allProspects: prospects, onEdit: openEdit, onSave: save }
 
+useEffect(() => {
+  if (loading) return // aguarda carregar
+  const handler = (e) => {
+    if (e.detail?.type === 'parceria') {
+      const prospect = prospects.find(p => p.id === e.detail.id)
+      if (prospect) { setEditing(prospect); setModal(true) }
+    }
+  }
+  // Verifica se já tem item pendente para abrir
+  if (window.__openItem?.type === 'parceria') {
+    const prospect = prospects.find(p => p.id === window.__openItem.id)
+    if (prospect) { setEditing(prospect); setModal(true); window.__openItem = null }
+  }
+  window.addEventListener('open-item', handler)
+  return () => window.removeEventListener('open-item', handler)
+}, [prospects, loading])
+
+const isMobile = useIsMobile()
+
   return (
     <div className="flex" style={{ minHeight: '100vh' }}>
       <Sidebar title="Parcerias" subtitle="P">
@@ -101,7 +127,12 @@ const viewProps = { prospects: filtered, allProspects: prospects, onEdit: openEd
 
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Topbar */}
-        <div className="h-[60px] flex items-center gap-2.5 px-5 flex-shrink-0" style={{ borderBottom: '1px solid var(--border)', background: 'var(--bg)' }}>
+        <div className="h-[60px] flex items-center gap-2.5 px-5 flex-shrink-0"
+  style={{
+    borderBottom: '1px solid var(--border)',
+    background: 'var(--bg)',
+    paddingLeft: isMobile ? 64 : 20,
+  }}>
           <span className="font-title font-bold text-lg flex-1" style={{ color: 'var(--text)' }}>
             {VIEWS.find(v => v.id === view)?.label}
           </span>
@@ -153,7 +184,11 @@ const viewProps = { prospects: filtered, allProspects: prospects, onEdit: openEd
               {view === 'kanban'    && <ParceriasKanban   {...viewProps} />}
               {view === 'phases'   && <ParceriasFases    {...viewProps} />}
               {view === 'pipeline' && <ParceriasPipeline {...viewProps} />}
-              {view === 'calendar' && <ParceriasCalendar {...viewProps} />}
+              {view === 'calendar' && <ParceriasCalendar {...viewProps} onNewItem={date => {
+  setEditing(null)
+  setDatePreset(date)
+  setModal(true)
+}} />}
               {view === 'database' && <ParceriasDatabase {...viewProps} />}
             </>
           )}
@@ -162,10 +197,10 @@ const viewProps = { prospects: filtered, allProspects: prospects, onEdit: openEd
 
       <ParceriasModal
         open={modal}
-        onClose={() => setModal(false)}
+        onClose={() => { setModal(false); setDatePreset(null) }}
         onSave={handleSave}
         onDelete={editing ? () => handleDelete(editing.id) : null}
-        initial={editing}
+        initial={editing ?? (datePreset ? { followup: datePreset } : null)}
       />
     </div>
   )

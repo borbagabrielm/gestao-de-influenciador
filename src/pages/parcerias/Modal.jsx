@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Modal, { FormRow, FormGrid, ModalActions } from '@/components/Modal'
 import Comentarios from '@/components/Comentarios'
+import Historico from '@/components/Historico'
+import { useHistorico } from '@/hooks/useHistorico'
 
 const EMPTY = { company:'', contact:'', email:'', value:'', followup:'', notes:'', pubdate:'', pgtoDate:'', finalValue:'', tags:[], modo:null, phase:1, status:'lead', statusHistory:[] }
 const TIPOS = ['publicidade','permuta','seeding','collab','embaixadora']
@@ -14,6 +16,7 @@ export default function ParceriasModal({ open, onClose, onSave, onDelete, initia
   const [errors,    setErrors]    = useState({})
   const [conteudos, setConteudos] = useState([])
   const [financeiro,setFinanceiro]= useState([])
+  const { registrar } = useHistorico('parceria', initial?.id)
 
   useEffect(() => {
     if (open) {
@@ -50,6 +53,10 @@ export default function ParceriasModal({ open, onClose, onSave, onDelete, initia
       statusHistory = [...statusHistory, initial.status]
     }
     setSaving(true)
+    if (initial) {
+  if (initial.status !== form.status) await registrar('status', initial.status, form.status)
+  if (initial.phase  !== phase)       await registrar('phase',  String(initial.phase), String(phase))
+}
     await onSave({ ...form, phase, statusHistory })
     setSaving(false)
   }
@@ -220,6 +227,8 @@ export default function ParceriasModal({ open, onClose, onSave, onDelete, initia
       )}
 
       <Comentarios tipo="parceria" refId={initial?.id} />
+
+<Historico tipo="parceria" refId={initial?.id} />
 
       <ModalActions onClose={onClose} onDelete={initial ? onDelete : null} saving={saving} onClick={handleSave} />
       <div className="hidden"><button onClick={handleSave} id="__save-trigger" /></div>

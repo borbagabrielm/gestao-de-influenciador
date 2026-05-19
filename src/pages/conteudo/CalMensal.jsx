@@ -4,7 +4,7 @@ import { MiniCard, isAtrasado } from './shared'
 const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
 const DOWS   = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
 
-export default function CnCalMensal({ conteudos, onEdit, onDrop }) {
+export default function CnCalMensal({ conteudos, onEdit, onDrop, onNewItem }) {
   const now = new Date()
   const [month, setMonth] = useState(now.getMonth())
   const [year,  setYear]  = useState(now.getFullYear())
@@ -58,17 +58,19 @@ export default function CnCalMensal({ conteudos, onEdit, onDrop }) {
 
           return (
             <div key={idx}
-              style={{
-                minHeight:96,
-                borderRight: idx%7===6?'none':'1px solid var(--border)',
-                borderBottom:'1px solid var(--border)',
-                padding:'6px',
-                opacity: cell.other?0.35:1,
-                background: isOver?'var(--accent-dk)':'',
-                border: isOver?'2px dashed var(--accent)':'',
-                transition:'background .15s',
-              }}
-              onDragOver={e=>{e.preventDefault();if(!cell.other)setOverCell(ds)}}
+  style={{
+    minHeight:96,
+    borderRight: idx%7===6?'none':'1px solid var(--border)',
+    borderBottom:'1px solid var(--border)',
+    padding:'6px',
+    opacity: cell.other?0.35:1,
+    background: isOver?'var(--accent-dk)':'',
+    outline: isOver?'2px dashed var(--accent)':'none',
+    transition:'background .15s',
+    cursor: cell.other ? 'default' : 'pointer',
+  }}
+  onClick={() => !cell.other && !dragId && onNewItem?.(ds)}
+  onDragOver={e=>{e.preventDefault();if(!cell.other)setOverCell(ds)}}
               onDragLeave={()=>setOverCell(null)}
               onDrop={()=>!cell.other&&handleDrop(ds)}
               onMouseEnter={e=>{if(!cell.other&&!isOver)e.currentTarget.style.background='var(--bg3)'}}
@@ -82,7 +84,7 @@ export default function CnCalMensal({ conteudos, onEdit, onDrop }) {
                   borderRadius:isToday?'50%':0, fontWeight:isToday?700:400,
                 }}>{cell.day}</div>
               {shown.map(c=>(
-                <MiniCard key={c.id} c={c} onEdit={onEdit}
+                <MiniCard key={c.id} c={c} onEdit={id => { onEdit(id) }}
                   onDragStart={()=>setDragId(c.id)}
                   onDragEnd={()=>setDragId(null)} />
               ))}

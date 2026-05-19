@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import ThemeToggle from '@/components/ThemeToggle'
 import DailyAlerts from '@/components/DailyAlerts'
 import GlobalSearch from '@/components/GlobalSearch'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 const AREAS = [
   {
@@ -45,10 +46,12 @@ export default function HomePage() {
   const name     = user?.email?.split('@')[0] || ''
   const initials = user?.email?.slice(0, 2).toUpperCase() || '?'
 
+const isMobile = useIsMobile()
+
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
       {/* Top bar */}
-      <div className="fixed top-0 right-0 z-50 flex items-center gap-3 p-4">
+      <div className={`fixed top-0 right-0 z-50 flex items-center gap-3 p-4 ${isMobile ? 'left-0 justify-end' : ''}`}>
         <GlobalSearch />
         <ThemeToggle inline />
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl" style={{ background: 'var(--bg2)', border: '1px solid var(--border)' }}>
@@ -76,7 +79,9 @@ export default function HomePage() {
           <DailyAlerts />
 
 {/* Cards de área — todos na mesma linha */}
-<div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+<div className="grid gap-5" style={{
+  gridTemplateColumns: isMobile ? '1fr' : 'repeat(4, 1fr)'
+}}>
   {AREAS.map(area => (
     <div key={area.path}
       onClick={() => nav(area.path)}

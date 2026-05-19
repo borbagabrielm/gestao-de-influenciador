@@ -3,7 +3,7 @@ import { useState } from 'react'
 const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
 const DOWS   = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']
 
-export default function ParceriasCalendar({ allProspects, onEdit }) {
+export default function ParceriasCalendar({ allProspects, onEdit, onNewItem }) {
   const now = new Date()
   const [month, setMonth] = useState(now.getMonth())
   const [year,  setYear]  = useState(now.getFullYear())
@@ -47,16 +47,18 @@ export default function ParceriasCalendar({ allProspects, onEdit }) {
           const evs = cell.other ? [] : allProspects.filter(p => p.followup === ds || p.pubdate === ds || p.pgtoDate === ds)
 
           return (
-            <div key={idx} className="transition-colors" style={{
-              minHeight: 96,
-              borderRight: idx % 7 === 6 ? 'none' : '1px solid var(--border)',
-              borderBottom: '1px solid var(--border)',
-              padding: '6px',
-              opacity: cell.other ? 0.35 : 1,
-            }}
-              onMouseEnter={e => !cell.other && (e.currentTarget.style.background = 'var(--bg3)')}
-              onMouseLeave={e => e.currentTarget.style.background = ''}
-            >
+<div key={idx} className="transition-colors" style={{
+  minHeight: 96,
+  borderRight: idx % 7 === 6 ? 'none' : '1px solid var(--border)',
+  borderBottom: '1px solid var(--border)',
+  padding: '6px',
+  opacity: cell.other ? 0.35 : 1,
+  cursor: cell.other ? 'default' : 'pointer',
+}}
+  onClick={() => !cell.other && onNewItem?.(ds)}
+  onMouseEnter={e => !cell.other && (e.currentTarget.style.background = 'var(--bg3)')}
+  onMouseLeave={e => e.currentTarget.style.background = ''}
+>
               <div className="text-xs mb-1 inline-flex items-center justify-center"
                 style={{
                   color: isToday ? '#000' : 'var(--text2)',
@@ -72,7 +74,7 @@ export default function ParceriasCalendar({ allProspects, onEdit }) {
                 const c = p.pubdate === ds ? '#4ade80' : p.pgtoDate === ds ? '#fbbf24' : '#60a5fa'
                 const l = p.pubdate === ds ? '📢 ' : p.pgtoDate === ds ? '💰 ' : '↩ '
                 return (
-                  <div key={p.id} onClick={() => onEdit(p.id)} className="text-[10px] px-1.5 py-0.5 rounded mb-0.5 cursor-pointer truncate"
+                  <div key={p.id} onClick={e => { e.stopPropagation(); onEdit(p.id) }} className="text-[10px] px-1.5 py-0.5 rounded mb-0.5 cursor-pointer truncate"
                     style={{ background: c+'22', color: c }}>
                     {l}{p.company}
                   </div>
