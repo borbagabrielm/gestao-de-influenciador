@@ -86,19 +86,26 @@ export function useConteudos() {
     setConteudos(prev => prev.map(c => c.id === id ? { ...c, ...fields } : c))
   }
 
-  const duplicate = async (id) => {
-    const original = conteudos.find(c => c.id === id)
-    if (!original) return
-    const { data: { user } } = await supabase.auth.getUser()
-    const payload = { ...original, titulo: original.titulo + ' (cópia)', status: 'backlog', data_publicacao: '' }
-    const row = toDB(payload, user.id)
-    const { data, error } = await supabase
-      .from('conteudos')
-      .insert({ ...row, created_at: new Date().toISOString() })
-      .select().single()
-    if (error) throw error
-    setConteudos(prev => [fromDB(data), ...prev])
+const duplicate = async (id) => {
+  const original = conteudos.find(c => c.id === id)
+  if (!original) return
+  const { data: { user } } = await supabase.auth.getUser()
+  const payload = {
+    ...original,
+    titulo: original.titulo + ' (cópia)',
+    status: 'backlog',
+    prospect_id: original.prospect_id || null,
+    // mantém data_publicacao original
   }
+  const row = toDB(payload, user.id)
+  const { data, error } = await supabase
+    .from('conteudos')
+    .insert({ ...row, created_at: new Date().toISOString() })
+    .select().single()
+  if (error) throw error
+  await load()
+  return fromDB(data) // retorna o novo item
+}
 
   return { conteudos, loading, load, save, remove, updateField, duplicate }
 }

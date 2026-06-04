@@ -59,6 +59,12 @@ export function KCard({ prospect, onEdit, color }) {
       <div className="text-[11px] mb-2.5" style={{ color: 'var(--text3)' }}>{p.contact || '—'}</div>
 
       <div className="flex flex-wrap gap-1 mb-2.5">
+        {p.campanha && (
+  <span className="text-[10px] px-1.5 py.0.5 rounded-md mt-0.5 inline-block"
+    style={{ background: 'var(--blue-bg)', color: 'var(--blue)', border: '1px solid var(--blue)30' }}>
+    📁 {p.campanha}
+  </span>
+)}
         {p.tags.map(t => (
           <span key={t} className={`tag-base ${tagClass(t)}`} style={{
             background: t==='publicidade'?'var(--purple-bg)':t==='permuta'?'var(--teal-bg)':t==='seeding'?'var(--amber-bg)':'var(--bg4)',

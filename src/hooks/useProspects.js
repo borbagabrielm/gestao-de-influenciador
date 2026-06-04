@@ -17,6 +17,8 @@ const fromDB = r => ({
   pubdate: r.pubdate || '',
   pgtoDate: r.pgto_date || '',
   statusHistory: r.status_history || [],
+  whatsapp: r.whatsapp || '',
+  campanha: r.campanha || '',
 })
 
 const toDB = (d, userId) => ({
@@ -36,6 +38,8 @@ const toDB = (d, userId) => ({
   pgto_date: d.pgtoDate || null,
   status_history: d.statusHistory || [],
   updated_at: new Date().toISOString(),
+  whatsapp: d.whatsapp || '',
+  campanha: d.campanha || '',
 })
 
 export function useProspects() {

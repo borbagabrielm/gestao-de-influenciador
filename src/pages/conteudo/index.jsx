@@ -69,10 +69,18 @@ export default function ConteudoPage() {
     try { await remove(id); toast.success('Conteúdo excluído'); setModal(false) }
     catch(e) { toast.error('Erro: '+e.message) }
   }
-  const handleDuplicate = async id => {
-    try { await duplicate(id); toast.success('Conteúdo duplicado'); setModal(false) }
-    catch(e) { toast.error('Erro: '+e.message) }
-  }
+const handleDuplicate = async id => {
+  try {
+    const newItem = await duplicate(id)
+    toast.success('Conteúdo duplicado')
+    setModal(false)
+    // Abre modal com o item duplicado para editar
+    setTimeout(() => {
+      setEditing(newItem)
+      setModal(true)
+    }, 300)
+  } catch(e) { toast.error('Erro: '+e.message) }
+}
   const handleDrop = async (id, fields) => {
     try { await updateField(id, fields) }
     catch(e) { toast.error('Erro: '+e.message) }

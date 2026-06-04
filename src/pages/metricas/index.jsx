@@ -5,6 +5,7 @@ import MetricasDashboard from './Dashboard'
 import MetricasTabela    from './Tabela'
 import MetricasImportar  from './Importar'
 import MetricasSeguidores from './Seguidores.jsx'
+import MetricasInsights from './Insights.jsx'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { PLAT_COLOR, FMT_COLOR } from './shared.js'
 
@@ -118,6 +119,7 @@ export default function MetricasPage() {
         <SidebarSection label="Menu">
           <SidebarItem active={view === 'dashboard'} onClick={() => setView('dashboard')}>📊 Dashboard</SidebarItem>
           <SidebarItem active={view === 'tabela'}    onClick={() => setView('tabela')}>📋 Tabela completa</SidebarItem>
+          <SidebarItem active={view === 'insights'} onClick={() => setView('insights')}>🧠 Insights IA</SidebarItem>
           <SidebarItem active={view === 'seguidores'} onClick={() => setView('seguidores')}>👥 Seguidores</SidebarItem>
           <SidebarItem active={view === 'importar'}  onClick={() => setView('importar')}>📥 Importar CSV</SidebarItem>
         </SidebarSection>
@@ -150,7 +152,7 @@ export default function MetricasPage() {
     paddingLeft: isMobile ? 64 : 20,
   }}>
           <span className="font-title font-bold text-lg flex-1">
-            {view === 'dashboard' ? 'Dashboard de Métricas' : view === 'tabela' ? 'Tabela Completa' : view === 'seguidores' ? 'Seguidores' : 'Importar CSV'}
+            {view === 'dashboard' ? 'Dashboard de Métricas' : view === 'tabela' ? 'Tabela Completa' : view === 'insights' ? 'Insights de Performance' : view === 'seguidores' ? 'Seguidores' : 'Importar CSV'}
           </span>
           {(view === 'dashboard' || view === 'tabela') && (
             <>
@@ -192,6 +194,8 @@ export default function MetricasPage() {
               onSort={handleSort}
             />
           )}
+
+{view === 'insights' && <MetricasInsights metricas={filtered} />}
           {view === 'importar' && (
             <MetricasImportar onImportSuccess={loadMetricas} />
           )}

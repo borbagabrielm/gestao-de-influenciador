@@ -10,6 +10,7 @@ import ParceriasPipeline from './Pipeline'
 import ParceriasCalendar from './Calendar'
 import ParceriasDatabase from './Database'
 import ParceriasModal    from './Modal'
+import ParceriasAgenda from './Agenda'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { P_PHASES } from '@/lib/constants'
@@ -20,6 +21,7 @@ const VIEWS = [
   { id: 'pipeline', label: 'Pipeline'         },
   { id: 'calendar', label: 'Calendário'       },
   { id: 'database', label: 'Banco de dados'   },
+  { id: 'agenda',   label: 'Agenda'           },
 ]
 
 export default function ParceriasPage() {
@@ -190,6 +192,7 @@ const isMobile = useIsMobile()
   setModal(true)
 }} />}
               {view === 'database' && <ParceriasDatabase {...viewProps} />}
+              {view === 'agenda' && <ParceriasAgenda prospects={prospects} />}
             </>
           )}
         </div>

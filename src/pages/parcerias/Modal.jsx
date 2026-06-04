@@ -5,7 +5,7 @@ import Comentarios from '@/components/Comentarios'
 import Historico from '@/components/Historico'
 import { useHistorico } from '@/hooks/useHistorico'
 
-const EMPTY = { company:'', contact:'', email:'', value:'', followup:'', notes:'', pubdate:'', pgtoDate:'', finalValue:'', tags:[], modo:null, phase:1, status:'lead', statusHistory:[] }
+const EMPTY = { campanha: '', company:'', contact:'', whatsapp: '', email:'', value:'', followup:'', notes:'', pubdate:'', pgtoDate:'', finalValue:'', tags:[], modo:null, phase:1, status:'lead', statusHistory:[] }
 const TIPOS = ['publicidade','permuta','seeding','collab','embaixadora']
 const MODOS = [{ v:'ativa', label:'🟢 Ativa' }, { v:'passiva', label:'🟣 Passiva' }]
 
@@ -90,6 +90,9 @@ export default function ParceriasModal({ open, onClose, onSave, onDelete, initia
       {phase === 1 && (
         <>
           <FormGrid>
+            <FormRow label="Campanha">
+  <input className="form-input" value={form.campanha} onChange={e => set('campanha', e.target.value)} placeholder="Ex: Verão 2026, Lançamento..." />
+</FormRow>
             <FormRow label="Empresa / Marca">
               <input className={`form-input${errors.company ? ' border-[var(--coral)]' : ''}`} value={form.company} onChange={e => set('company', e.target.value)} placeholder="Nike Brasil" />
               {errors.company && <p className="text-xs mt-1" style={{ color: 'var(--coral)' }}>{errors.company}</p>}
@@ -98,9 +101,12 @@ export default function ParceriasModal({ open, onClose, onSave, onDelete, initia
               <input className="form-input" value={form.contact} onChange={e => set('contact', e.target.value)} placeholder="Nome" />
             </FormRow>
           </FormGrid>
-          <FormRow label="E-mail / WhatsApp">
-            <input className="form-input" value={form.email} onChange={e => set('email', e.target.value)} placeholder="contato@empresa.com" />
-          </FormRow>
+          <FormRow label="E-mail">
+  <input className="form-input" value={form.email} onChange={e => set('email', e.target.value)} placeholder="contato@empresa.com" />
+</FormRow>
+<FormRow label="WhatsApp">
+  <input className="form-input" value={form.whatsapp} onChange={e => set('whatsapp', e.target.value)} placeholder="+55 51 99999-9999" />
+</FormRow>
           <FormGrid>
             <FormRow label="Valor estimado (R$)">
               <input className="form-input" type="number" value={form.value} onChange={e => set('value', e.target.value)} placeholder="0" />
