@@ -422,3 +422,8 @@ entrypoint = "./functions/insights/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/insights/*.html" ]
+
+[functions.midia-kit]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/midia-kit/index.ts"
