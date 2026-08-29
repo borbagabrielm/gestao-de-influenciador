@@ -36,9 +36,9 @@ export default function GlobalSearch({ onOpenItem }) {
         supabase.from('conteudos').select('id,titulo,status,rede_social').ilike('titulo', `%${q}%`).limit(4),
       ])
       const all = [
-        ...(p.data || []).map(r => ({ ...r, _type: 'parceria',   _label: r.company,   _sub: r.status,   _path: '/parcerias'  })),
-        ...(f.data || []).map(r => ({ ...r, _type: 'financeiro', _label: r.descricao, _sub: r.tipo + ' · R$' + Number(r.valor).toLocaleString('pt-BR'), _path: '/financeiro' })),
-        ...(c.data || []).map(r => ({ ...r, _type: 'conteudo',   _label: r.titulo,    _sub: r.rede_social || r.status, _path: '/conteudo' })),
+        ...(p.data || []).map(r => ({ ...r, _type: 'parceria',   _label: r.company,   _sub: r.status,   _path: '/painel/parcerias'  })),
+        ...(f.data || []).map(r => ({ ...r, _type: 'financeiro', _label: r.descricao, _sub: r.tipo + ' · R$' + Number(r.valor).toLocaleString('pt-BR'), _path: '/painel/financeiro' })),
+        ...(c.data || []).map(r => ({ ...r, _type: 'conteudo',   _label: r.titulo,    _sub: r.rede_social || r.status, _path: '/painel/conteudo' })),
       ]
       setResults(all)
       setSelected(0)

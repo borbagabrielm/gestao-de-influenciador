@@ -53,7 +53,7 @@ export default function Sidebar({ title, subtitle, accentColor, children }) {
             <div className="text-[10px] truncate" style={{ color: 'var(--text3)' }}>{user?.email}</div>
           </div>
         </div>
-        <button onClick={() => { nav('/'); isMobile && setOpen(false) }}
+        <button onClick={() => { nav('/painel'); isMobile && setOpen(false) }}
           className="w-full py-1.5 text-[11px] rounded-lg transition-colors"
           style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text3)' }}
           onMouseEnter={e => { e.target.style.borderColor = 'var(--accent)'; e.target.style.color = 'var(--accent)' }}

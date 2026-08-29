@@ -7,7 +7,7 @@ import { useIsMobile } from '@/hooks/useIsMobile'
 
 const AREAS = [
   {
-    path: '/parcerias',
+    path: '/painel/parcerias',
     icon: '🤝',
     iconBg: 'var(--accent-dk)',
     title: 'Parcerias',
@@ -15,7 +15,7 @@ const AREAS = [
     tags: ['Kanban', 'Pipeline', 'Calendário', 'Funil acumulado'],
   },
   {
-    path: '/financeiro',
+    path: '/painel/financeiro',
     icon: '💰',
     iconBg: 'var(--teal-bg)',
     title: 'Controle Financeiro',
@@ -23,7 +23,7 @@ const AREAS = [
     tags: ['Dashboard', 'Extrato', 'Gráficos', 'Por categoria'],
   },
   {
-    path: '/conteudo',
+    path: '/painel/conteudo',
     icon: '📅',
     iconBg: 'var(--purple-bg)',
     title: 'Gestão de Conteúdo',
@@ -31,7 +31,7 @@ const AREAS = [
     tags: ['Calendário', 'Kanban', 'Banco de Ideias', 'Dashboard'],
   },
   {
-  path: '/metricas',
+  path: '/painel/metricas',
   icon: '📊',
   iconBg: 'var(--purple-bg)',
   title: 'Métricas de Performance',

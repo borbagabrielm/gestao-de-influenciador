@@ -2,6 +2,8 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { ToastProvider } from '@/contexts/ToastContext'
+import LandingPage    from '@/pages/Landing'
+import MidiaKitPage   from '@/pages/MidiaKit'
 import LoginPage     from '@/pages/Login'
 import HomePage      from '@/pages/Home'
 import ParceriasPage from '@/pages/parcerias'
@@ -22,7 +24,7 @@ function PrivateRoute({ children }) {
 function PublicRoute({ children }) {
   const { user, loading } = useAuth()
   if (loading) return null
-  return user ? <Navigate to="/" replace /> : children
+  return user ? <Navigate to="/painel" replace /> : children
 }
 
 export default function App() {
@@ -32,13 +34,17 @@ export default function App() {
         <ToastProvider>
           <BrowserRouter>
             <Routes>
+              <Route path="/"          element={<LandingPage />} />
+              <Route path="/midia-kit" element={<MidiaKitPage />} />
               <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
-              <Route path="/"            element={<PrivateRoute><HomePage /></PrivateRoute>} />
-              <Route path="/parcerias/*" element={<PrivateRoute><ParceriasPage /></PrivateRoute>} />
-              <Route path="/financeiro/*" element={<PrivateRoute><FinanceiroPage /></PrivateRoute>} />
-              <Route path="/conteudo/*"  element={<PrivateRoute><ConteudoPage /></PrivateRoute>} />
-              <Route path="*"           element={<Navigate to="/" replace />} />
-              <Route path="/metricas/*" element={<PrivateRoute><MetricasPage /></PrivateRoute>} />
+
+              <Route path="/painel"              element={<PrivateRoute><HomePage /></PrivateRoute>} />
+              <Route path="/painel/parcerias/*"  element={<PrivateRoute><ParceriasPage /></PrivateRoute>} />
+              <Route path="/painel/financeiro/*" element={<PrivateRoute><FinanceiroPage /></PrivateRoute>} />
+              <Route path="/painel/conteudo/*"   element={<PrivateRoute><ConteudoPage /></PrivateRoute>} />
+              <Route path="/painel/metricas/*"   element={<PrivateRoute><MetricasPage /></PrivateRoute>} />
+
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </BrowserRouter>
         </ToastProvider>
