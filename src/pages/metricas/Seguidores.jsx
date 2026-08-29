@@ -102,7 +102,7 @@ export default function MetricasSeguidores() {
                   <div className="text-[11px] uppercase tracking-wider mb-1" style={{ color: 'var(--text3)' }}>
                     {plat === 'instagram' ? '📸 Instagram' : '🎵 TikTok'}
                   </div>
-                  <div className="font-title font-black text-3xl" style={{ color }}>{fmtN(total)}</div>
+                  <div className="font-title font-black text-3xl" style={{ color }}>{Number(total).toLocaleString('pt-BR')}</div>
                   <div className="text-xs mt-0.5" style={{ color: 'var(--text3)' }}>seguidores</div>
                 </div>
                 {growth !== null && (
@@ -189,7 +189,7 @@ export default function MetricasSeguidores() {
                       {d.plataforma}
                     </span>
                     <span className="text-xs flex-shrink-0" style={{ color: 'var(--text3)' }}>{fmtDate(d.data_ref)}</span>
-                    <span className="text-sm font-bold" style={{ color: PLAT_COLOR[d.plataforma] }}>{fmtN(d.quantidade)}</span>
+                    <span className="text-sm font-bold" style={{ color: PLAT_COLOR[d.plataforma] }}>{Number(d.quantidade).toLocaleString('pt-BR')}</span>
                     {growth !== null && (
                       <span className="text-xs ml-auto" style={{ color: Number(growth) >= 0 ? 'var(--green)' : 'var(--coral)' }}>
                         {Number(growth) >= 0 ? '↑' : '↓'} {Math.abs(Number(growth))}%
