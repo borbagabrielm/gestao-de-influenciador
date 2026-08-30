@@ -11,8 +11,31 @@ const MIN_FOR_LOOP = 4
 
 function MediaThumb({ src, alt, className }) {
   return isVideoUrl(src)
-    ? <video className={className} src={src} autoPlay muted loop playsInline />
+    ? <video className={className} src={src} muted loop playsInline preload="metadata" />
     : <img className={className} src={src} alt={alt} loading="lazy" />
+}
+
+// Só toca os vídeos do carrossel que estão realmente visíveis dentro da
+// faixa mascarada — evita dezenas de vídeos decodificando ao mesmo tempo.
+function useLazyCarouselVideos(deps) {
+  useEffect(() => {
+    if (!window.IntersectionObserver) return
+    const observers = []
+    document.querySelectorAll('.mk-carousel-viewport').forEach(viewport => {
+      const io = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          const video = entry.target.querySelector('video')
+          if (!video) return
+          if (entry.isIntersecting) video.play().catch(() => {})
+          else video.pause()
+        })
+      }, { root: viewport, rootMargin: '0px 40px' })
+      viewport.querySelectorAll('.mk-car-item').forEach(item => io.observe(item))
+      observers.push(io)
+    })
+    return () => observers.forEach(io => io.disconnect())
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps)
 }
 
 const DEFAULT_CONTENT = {
@@ -139,6 +162,8 @@ export default function MidiaKitPage() {
   const loopsBrands = brands.length >= MIN_FOR_LOOP
   const brandItems = loopsBrands ? [...brands, ...brands] : brands
 
+  useLazyCarouselVideos([carouselItems.length])
+
   return (
     <div className="midia-kit">
       <div className="mk-masthead">
@@ -220,7 +245,6 @@ export default function MidiaKitPage() {
                   {carouselItems.map((item, i) => (
                     <a key={item.id + '-' + i} className="mk-car-item" href={item.linkUrl || undefined}
                       target={item.linkUrl ? '_blank' : undefined} rel="noreferrer">
-                      <span className="mk-car-tag mk-mono">{String((i % items.length) + 1).padStart(2, '0')}</span>
                       <MediaThumb src={item.mediaUrl} alt={`Conteúdo ${i + 1}`} />
                     </a>
                   ))}
