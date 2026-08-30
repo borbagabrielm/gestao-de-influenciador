@@ -53,6 +53,7 @@ const DEFAULT_CONTENT = {
   contact_subtitle: 'Vamos construir uma parceria de sucesso.',
   whatsapp_url: 'https://api.whatsapp.com/send?phone=5551981494510&text=Oi%20gostaria%20de%20mais%20informa%C3%A7%C3%B5es%20para%20uma%20parceria%20com%20o%20Nico',
   email: 'oi@niconoal.com.br',
+  metrics_comparison_enabled: true,
 }
 
 function useMidiaKitStats() {
@@ -93,8 +94,8 @@ function growthLabel(pct) {
   return { text: `${pct >= 0 ? '↑' : '↓'} ${Math.abs(pct)}% em 30d`, dir }
 }
 
-function StatTile({ value, label, growthPct, loading }) {
-  const growth = growthLabel(growthPct)
+function StatTile({ value, label, growthPct, loading, showComparison }) {
+  const growth = showComparison ? growthLabel(growthPct) : null
   return (
     <div className="mk-pstat">
       <span className={`num${loading ? ' mk-skel' : ''}`}>{loading ? '—' : value}</span>
@@ -104,7 +105,7 @@ function StatTile({ value, label, growthPct, loading }) {
   )
 }
 
-function PlatformBlock({ platform, label, handle, icon, stats, loading, error }) {
+function PlatformBlock({ platform, label, handle, icon, stats, loading, error, showComparison }) {
   const cls = platform === 'instagram' ? 'ig' : 'tt'
   return (
     <div className={`mk-platform ${cls}`}>
@@ -123,15 +124,15 @@ function PlatformBlock({ platform, label, handle, icon, stats, loading, error })
         </div>
       ) : (
         <div className="mk-platform-stats">
-          <StatTile loading={loading} value={stats?.followers != null ? fmtN(stats.followers) : '—'} label="Seguidores"
+          <StatTile loading={loading} showComparison={showComparison} value={stats?.followers != null ? fmtN(stats.followers) : '—'} label="Seguidores"
             growthPct={stats?.growthPct30d} />
-          <StatTile loading={loading} value={stats?.avgEngagementPct != null ? `${stats.avgEngagementPct}%` : '—'} label="Engajamento médio"
+          <StatTile loading={loading} showComparison={showComparison} value={stats?.avgEngagementPct != null ? `${stats.avgEngagementPct}%` : '—'} label="Engajamento médio"
             growthPct={stats?.avgEngagementGrowthPct30d} />
-          <StatTile loading={loading} value={stats?.avgViews != null ? fmtN(stats.avgViews) : '—'} label="Views médias"
+          <StatTile loading={loading} showComparison={showComparison} value={stats?.avgViews != null ? fmtN(stats.avgViews) : '—'} label="Views médias"
             growthPct={stats?.avgViewsGrowthPct30d} />
-          <StatTile loading={loading} value={stats?.postsAnalyzed ?? '—'} label="Posts analisados"
+          <StatTile loading={loading} showComparison={showComparison} value={stats?.postsAnalyzed ?? '—'} label="Posts analisados"
             growthPct={stats?.postsAnalyzedGrowthPct30d} />
-          <StatTile loading={loading} value={stats?.totalReach ? fmtN(stats.totalReach) : (stats?.totalViews ? fmtN(stats.totalViews) : '—')} label="Alcance total"
+          <StatTile loading={loading} showComparison={showComparison} value={stats?.totalReach ? fmtN(stats.totalReach) : (stats?.totalViews ? fmtN(stats.totalViews) : '—')} label="Alcance total"
             growthPct={stats?.totalReachGrowthPct30d} />
           <StatTile loading={loading} value={stats?.topFormat?.label?.toUpperCase() || '—'} label="Melhor formato" />
         </div>
@@ -287,8 +288,8 @@ export default function MidiaKitPage() {
               <p className="mk-section-desc">Números reais, direto da base de dados da plataforma — atualizados automaticamente.</p>
             </div>
           </div>
-          <PlatformBlock platform="instagram" label="Instagram" handle="@niconoal" icon="📸" stats={stats?.instagram} loading={statsLoading} error={statsError} />
-          <PlatformBlock platform="tiktok" label="TikTok" handle="@niconoal" icon="🎵" stats={stats?.tiktok} loading={statsLoading} error={statsError} />
+          <PlatformBlock platform="instagram" label="Instagram" handle="@niconoal" icon="📸" stats={stats?.instagram} loading={statsLoading} error={statsError} showComparison={c.metrics_comparison_enabled !== false} />
+          <PlatformBlock platform="tiktok" label="TikTok" handle="@niconoal" icon="🎵" stats={stats?.tiktok} loading={statsLoading} error={statsError} showComparison={c.metrics_comparison_enabled !== false} />
         </div>
       </div>
 

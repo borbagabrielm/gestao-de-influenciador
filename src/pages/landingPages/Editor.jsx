@@ -49,6 +49,30 @@ function Field({ label, value, onChange, type }) {
   )
 }
 
+function Toggle({ checked, onChange, label, desc }) {
+  return (
+    <label className="flex items-center justify-between gap-4" style={{ cursor: 'pointer' }}>
+      <div>
+        <div className="text-sm font-medium" style={{ color: 'var(--text)' }}>{label}</div>
+        {desc && <div className="text-xs mt-0.5" style={{ color: 'var(--text3)' }}>{desc}</div>}
+      </div>
+      <button type="button" role="switch" aria-checked={checked} onClick={() => onChange(!checked)}
+        className="relative flex-shrink-0"
+        style={{
+          width: 40, height: 22, borderRadius: 999,
+          background: checked ? 'var(--accent)' : 'var(--bg4)',
+          border: '1px solid var(--border2)', cursor: 'pointer', transition: 'background 0.15s',
+        }}>
+        <span style={{
+          position: 'absolute', top: 2, left: checked ? 20 : 2,
+          width: 16, height: 16, borderRadius: '50%',
+          background: checked ? '#000' : 'var(--text3)', transition: 'left 0.15s',
+        }} />
+      </button>
+    </label>
+  )
+}
+
 function ReorderButtons({ index, total, onUp, onDown, onRemove, confirmLabel }) {
   return (
     <div className="flex items-center gap-1 flex-shrink-0">
@@ -217,6 +241,17 @@ export default function LandingPageEditor() {
           ))}
         </div>
       ))}
+
+      {/* Métricas */}
+      <div className="card">
+        <div className="text-sm font-semibold mb-4" style={{ color: 'var(--text)' }}>Métricas</div>
+        <Toggle
+          checked={form.metrics_comparison_enabled !== false}
+          onChange={v => setField('metrics_comparison_enabled', v)}
+          label="Mostrar comparativo de 30 dias"
+          desc="Exibe a variação (↑/↓ %) de cada métrica em relação aos 30 dias anteriores. Desative se preferir mostrar só os números atuais."
+        />
+      </div>
 
       {/* Carrossel de conteúdos */}
       <div className="card">
