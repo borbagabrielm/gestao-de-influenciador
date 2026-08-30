@@ -6,8 +6,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const PERIOD_DAYS = 90
+const PERIOD_DAYS = 30
 const GROWTH_WINDOW_DAYS = 30
+const FETCH_WINDOW_DAYS = GROWTH_WINDOW_DAYS * 2 // busca 60d: os 30d atuais + os 30d anteriores, pro comparativo
 
 function isoDaysAgo(days: number) {
   const d = new Date()
@@ -67,7 +68,13 @@ function followerStats(seguidores: any[], plataforma: string) {
   return { followers: current, growthPct30d }
 }
 
-function platformStats(rows: any[], platform: string) {
+// rows60 cobre os últimos 60 dias — separamos em "atuais" (últimos 30d, o período
+// exibido na tela) e "anteriores" (30-60d atrás, base do comparativo)
+function platformStats(rows60: any[], platform: string) {
+  const cutoff30 = isoDaysAgo(GROWTH_WINDOW_DAYS)
+  const rows = rows60.filter(m => m.data_ref >= cutoff30) // período atual (30d), o que a tela mostra
+  const priorRows = rows60.filter(m => m.data_ref < cutoff30)
+
   if (!rows.length) return null
 
   const byFmt: Record<string, any[]> = {}
@@ -84,16 +91,14 @@ function platformStats(rows: any[], platform: string) {
     }
   })
 
-  const cutoff30 = isoDaysAgo(GROWTH_WINDOW_DAYS)
-  const cutoff60 = isoDaysAgo(GROWTH_WINDOW_DAYS * 2)
-  const last30 = windowStats(rows.filter(m => m.data_ref >= cutoff30))
-  const prior30 = windowStats(rows.filter(m => m.data_ref >= cutoff60 && m.data_ref < cutoff30))
+  const current = windowStats(rows)
+  const prior = windowStats(priorRows)
 
   const totalReach = sum(rows, 'alcance')
   // "Alcance total" na tela cai pra totalViews quando não há alcance (TikTok) — o comparativo segue a mesma métrica exibida
   const reachGrowth = totalReach > 0
-    ? pctChange(last30.totalReach, prior30.totalReach)
-    : pctChange(last30.totalViews, prior30.totalViews)
+    ? pctChange(current.totalReach, prior.totalReach)
+    : pctChange(current.totalViews, prior.totalViews)
 
   return {
     postsAnalyzed: rows.length,
@@ -104,9 +109,9 @@ function platformStats(rows: any[], platform: string) {
     totalViews: sum(rows, 'views'),
     totalReach,
     topFormat,
-    postsAnalyzedGrowthPct30d: pctChange(last30.postsAnalyzed, prior30.postsAnalyzed),
-    avgViewsGrowthPct30d: pctChange(last30.avgViews, prior30.avgViews),
-    avgEngagementGrowthPct30d: pctChange(last30.avgEngagementPct, prior30.avgEngagementPct),
+    postsAnalyzedGrowthPct30d: pctChange(current.postsAnalyzed, prior.postsAnalyzed),
+    avgViewsGrowthPct30d: pctChange(current.avgViews, prior.avgViews),
+    avgEngagementGrowthPct30d: pctChange(current.avgEngagementPct, prior.avgEngagementPct),
     totalReachGrowthPct30d: reachGrowth,
   }
 }
@@ -122,7 +127,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     )
 
-    const cutoff = isoDaysAgo(PERIOD_DAYS)
+    const cutoff = isoDaysAgo(FETCH_WINDOW_DAYS)
 
     const [{ data: metricas, error: mErr }, { data: seguidores, error: sErr }] = await Promise.all([
       supabase.from('metricas').select('plataforma,views,likes,comentarios,compartilhamentos,alcance,data_ref,raw').gte('data_ref', cutoff),

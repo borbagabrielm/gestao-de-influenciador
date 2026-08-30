@@ -115,7 +115,7 @@ function PlatformBlock({ platform, label, handle, icon, stats, loading, error })
           <div className="mk-platform-name">{label}</div>
           <div className="mk-platform-handle mk-mono">{handle}</div>
         </div>
-        <div className="mk-platform-period mk-eyebrow">últimos 90 dias</div>
+        <div className="mk-platform-period mk-eyebrow">últimos 30 dias</div>
       </div>
       {error ? (
         <div style={{ padding: 24, textAlign: 'center', fontSize: '0.85rem', color: 'var(--mk-ink-dim)' }}>
