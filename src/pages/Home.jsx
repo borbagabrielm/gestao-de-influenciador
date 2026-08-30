@@ -38,6 +38,14 @@ const AREAS = [
   desc: 'Importe e acompanhe performance de posts do Instagram e TikTok.',
   tags: ['Instagram', 'TikTok', 'Importação CSV', 'Histórico'],
 },
+  {
+    path: '/painel/landing-pages',
+    icon: '🖼️',
+    iconBg: 'var(--blue-bg)',
+    title: 'Landing Pages',
+    desc: 'Edite textos, imagens e carrossel das páginas públicas.',
+    tags: ['Mídia Kit', 'Textos', 'Imagens', 'Carrossel'],
+  },
 ]
 
 export default function HomePage() {
@@ -74,13 +82,13 @@ const isMobile = useIsMobile()
           <p className="text-base" style={{ color: 'var(--text2)' }}>Selecione uma área para começar</p>
         </div>
 
-        <div className="w-full max-w-4xl">
+        <div className="w-full max-w-5xl">
           {/* Alertas do dia */}
           <DailyAlerts />
 
-{/* Cards de área — todos na mesma linha */}
+{/* Cards de área */}
 <div className="grid gap-5" style={{
-  gridTemplateColumns: isMobile ? '1fr' : 'repeat(4, 1fr)'
+  gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(200px, 1fr))'
 }}>
   {AREAS.map(area => (
     <div key={area.path}

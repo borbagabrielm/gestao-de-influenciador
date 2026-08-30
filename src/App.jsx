@@ -10,6 +10,7 @@ import ParceriasPage from '@/pages/parcerias'
 import FinanceiroPage from '@/pages/financeiro'
 import ConteudoPage  from '@/pages/conteudo'
 import MetricasPage from '@/pages/metricas'
+import LandingPagesPage from '@/pages/landingPages'
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth()
@@ -43,6 +44,7 @@ export default function App() {
               <Route path="/painel/financeiro/*" element={<PrivateRoute><FinanceiroPage /></PrivateRoute>} />
               <Route path="/painel/conteudo/*"   element={<PrivateRoute><ConteudoPage /></PrivateRoute>} />
               <Route path="/painel/metricas/*"   element={<PrivateRoute><MetricasPage /></PrivateRoute>} />
+              <Route path="/painel/landing-pages/*" element={<PrivateRoute><LandingPagesPage /></PrivateRoute>} />
 
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

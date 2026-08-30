@@ -1,14 +1,32 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import ThemeToggle from '@/components/ThemeToggle'
-import { SOCIALS, WhatsAppIcon, MailIcon, WHATSAPP_URL, EMAIL_URL, NICO_PHOTO } from '@/components/SocialIcons'
+import './MidiaKit.css'
+import { useLandingPage } from '@/hooks/useLandingPages'
+import { SOCIALS, WhatsAppIcon, MailIcon } from '@/components/SocialIcons'
 import { fmtN, PLAT_COLOR } from '@/pages/metricas/shared.js'
 
 const STATS_URL = 'https://rciywgiuktjipcjtmrzw.supabase.co/functions/v1/midia-kit'
 
+const DEFAULT_CONTENT = {
+  hero_eyebrow: 'criadora de conteúdo · moda & estilo',
+  hero_line1: 'COMUNICO.',
+  hero_line2: 'CRIO.',
+  hero_line3: 'INFLUENCIO.',
+  hero_caption: 'sobre duas coisas que eu amo muito: moda e criatividade — porto alegre, rs',
+  hero_photo_url: 'https://rciywgiuktjipcjtmrzw.supabase.co/storage/v1/object/public/avatars/nico.jpg',
+  sobre_eyebrow: 'Quem é o ele',
+  sobre_title: 'Autenticidade e ousadia em pessoa',
+  sobre_paragraph_1: 'Para o Nico, a vida é um palco onde cada escolha é uma chance de deixar sua marca. Com looks icônicos, humor afiado e uma energia contagiante, ele inspira todo mundo ao redor com criatividade, sempre buscando o extraordinário em tudo o que faz.',
+  sobre_paragraph_2: 'Fala (muito) sobre como se expressar através da moda está para aquilo que nos faz bem. Cria conteúdos extremamente lapidados e originais, mas também surfa em trends — sempre dando seu toque — compartilhando seu lifestyle de forma a inspirar quem se conecta com essa mistura única.',
+  contact_title: 'bora conversar?',
+  contact_subtitle: 'Vamos construir uma parceria de sucesso.',
+  whatsapp_url: 'https://api.whatsapp.com/send?phone=5551981494510&text=Oi%20gostaria%20de%20mais%20informa%C3%A7%C3%B5es%20para%20uma%20parceria%20com%20o%20Nico',
+  email: 'oi@niconoal.com.br',
+}
+
 function useMidiaKitStats() {
   const [data, setData] = useState(null)
-  const [status, setStatus] = useState('loading') // loading | ok | error
+  const [status, setStatus] = useState('loading')
 
   useEffect(() => {
     let cancelled = false
@@ -22,71 +40,57 @@ function useMidiaKitStats() {
   return { data, status }
 }
 
-function SectionTitle({ eyebrow, title, desc }) {
+function useReveal() {
+  const ref = useRef(null)
+  useEffect(() => {
+    const els = document.querySelectorAll('.mk-reveal')
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const io = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target) } })
+      }, { threshold: 0.12 })
+      els.forEach(el => io.observe(el))
+      return () => io.disconnect()
+    }
+    els.forEach(el => el.classList.add('in'))
+  }, [])
+  return ref
+}
+
+function StatTile({ value, label, sub, loading }) {
   return (
-    <div className="mb-6">
-      {eyebrow && (
-        <span className="text-[11px] font-semibold tracking-[0.18em] uppercase" style={{ color: 'var(--accent)' }}>
-          {eyebrow}
-        </span>
-      )}
-      <h2 className="font-title font-black text-2xl md:text-3xl mt-1.5 mb-2" style={{ color: 'var(--text)' }}>{title}</h2>
-      {desc && <p className="text-sm max-w-xl" style={{ color: 'var(--text2)' }}>{desc}</p>}
+    <div className="mk-pstat">
+      <span className={`num${loading ? ' mk-skel' : ''}`}>{loading ? '—' : value}</span>
+      <span className="lbl">{label}</span>
+      {sub && !loading && <span className="sub">{sub}</span>}
     </div>
   )
 }
 
-function StatTile({ label, value, sub, color, loading }) {
-  return (
-    <div className="stat-card">
-      <div className="text-[11px] uppercase tracking-wider mb-1.5" style={{ color: 'var(--text3)' }}>{label}</div>
-      {loading
-        ? <div className="skeleton h-7 w-16 rounded" />
-        : <div className="font-title font-black text-2xl" style={{ color: color || 'var(--text)' }}>{value}</div>}
-      {sub && !loading && <div className="text-xs mt-1" style={{ color: 'var(--text3)' }}>{sub}</div>}
-    </div>
-  )
-}
-
-function PlatformSection({ platform, label, handle, icon, stats, loading, error }) {
-  const color = PLAT_COLOR[platform]
+function PlatformBlock({ platform, label, handle, stats, loading, error }) {
   const growth = stats?.growthPct30d
-
   return (
-    <div className="rounded-2xl p-6 md:p-7" style={{ background: 'var(--bg2)', border: `1px solid ${color}30` }}>
-      <div className="flex items-center gap-2.5 mb-5">
-        <span className="w-9 h-9 rounded-xl flex items-center justify-center text-base flex-shrink-0" style={{ background: `${color}1a`, color }}>
-          {icon}
-        </span>
+    <div className="mk-platform">
+      <div className="mk-platform-head">
+        <div className={`bar ${platform === 'instagram' ? 'ig' : 'tt'}`} />
         <div>
-          <div className="font-title font-bold text-sm" style={{ color: 'var(--text)' }}>{label}</div>
-          <div className="text-xs" style={{ color: 'var(--text3)' }}>{handle}</div>
+          <div className="mk-platform-name">{label}</div>
+          <div className="mk-platform-handle mk-mono">{handle}</div>
         </div>
-        <span className="ml-auto text-[10px] px-2 py-1 rounded-md" style={{ background: 'var(--bg3)', color: 'var(--text3)' }}>
-          últimos 90 dias
-        </span>
+        <div className="mk-platform-period mk-eyebrow">últimos 90 dias</div>
       </div>
-
       {error ? (
-        <div className="text-sm py-6 text-center" style={{ color: 'var(--text3)' }}>
-          Estamos atualizando esses números — volte em breve 🔧
+        <div style={{ padding: 24, textAlign: 'center', fontSize: '0.85rem', color: 'var(--mk-cream-dim)' }}>
+          Estamos atualizando esses números — volte em breve
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          <StatTile label="Seguidores" loading={loading}
-            value={stats?.followers != null ? fmtN(stats.followers) : '—'}
-            sub={growth != null ? `${growth >= 0 ? '↑' : '↓'} ${Math.abs(growth)}% em 30d` : null}
-            color={color} />
-          <StatTile label="Posts analisados" loading={loading}
-            value={stats?.postsAnalyzed ?? '—'} color={color} />
-          <StatTile label="Views médias" loading={loading}
-            value={stats?.avgViews != null ? fmtN(stats.avgViews) : '—'} color={color} />
-          <StatTile label="Engajamento médio" loading={loading}
-            value={stats?.avgEngagementPct != null ? `${stats.avgEngagementPct}%` : '—'} color={color} />
-          <StatTile label="Alcance total" loading={loading}
-            value={stats?.totalReach ? fmtN(stats.totalReach) : (stats?.totalViews ? fmtN(stats.totalViews) : '—')} color={color} />
-          <StatTile label="Melhor formato" loading={loading}
-            value={stats?.topFormat?.label || '—'} color={color} />
+        <div className="mk-platform-stats">
+          <StatTile loading={loading} value={stats?.followers != null ? fmtN(stats.followers) : '—'} label="Seguidores"
+            sub={growth != null ? `${growth >= 0 ? '↑' : '↓'} ${Math.abs(growth)}% em 30d` : null} />
+          <StatTile loading={loading} value={stats?.avgEngagementPct != null ? `${stats.avgEngagementPct}%` : '—'} label="Engajamento médio" />
+          <StatTile loading={loading} value={stats?.avgViews != null ? fmtN(stats.avgViews) : '—'} label="Views médias" />
+          <StatTile loading={loading} value={stats?.postsAnalyzed ?? '—'} label="Posts analisados" />
+          <StatTile loading={loading} value={stats?.totalReach ? fmtN(stats.totalReach) : (stats?.totalViews ? fmtN(stats.totalViews) : '—')} label="Alcance total" />
+          <StatTile loading={loading} value={stats?.topFormat?.label?.toUpperCase() || '—'} label="Melhor formato" />
         </div>
       )}
     </div>
@@ -95,116 +99,227 @@ function PlatformSection({ platform, label, handle, icon, stats, loading, error 
 
 function ComingSoonCard({ icon, title, desc }) {
   return (
-    <div className="rounded-2xl p-6 text-center" style={{ background: 'var(--bg2)', border: '1px dashed var(--border2)' }}>
-      <div className="text-2xl mb-2">{icon}</div>
-      <div className="font-title font-bold text-sm mb-1" style={{ color: 'var(--text)' }}>{title}</div>
-      <p className="text-xs max-w-xs mx-auto" style={{ color: 'var(--text3)' }}>{desc}</p>
-      <span className="inline-block mt-3 text-[10px] px-2 py-1 rounded-md font-medium" style={{ background: 'var(--accent-dk)', color: 'var(--accent)' }}>
-        Em breve
-      </span>
+    <div className="mk-cs-card">
+      <div className="mk-cs-icon-wrap">{icon}</div>
+      <div className="mk-cs-title">{title}</div>
+      <div className="mk-cs-desc">{desc}</div>
+      <span className="mk-cs-tag">Em breve</span>
+    </div>
+  )
+}
+
+function BauhausDots() {
+  return (
+    <div className="mk-bauhaus-dots">
+      <div className="mk-bh-dot" /><div className="mk-bh-dot pinch" /><div className="mk-bh-dot" />
     </div>
   )
 }
 
 export default function MidiaKitPage() {
-  const { data, status } = useMidiaKitStats()
-  const loading = status === 'loading'
-  const error   = status === 'error'
+  const { page, items, loading: pageLoading } = useLandingPage('midia-kit')
+  const { data: stats, status } = useMidiaKitStats()
+  const statsLoading = status === 'loading'
+  const statsError = status === 'error'
+  useReveal()
+
+  const c = page?.content && Object.keys(page.content).length ? page.content : DEFAULT_CONTENT
+  const carouselItems = items.length ? [...items, ...items] : []
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-6 py-5 md:px-10">
-        <Link to="/" className="font-title font-bold text-sm tracking-wide" style={{ color: 'var(--text)' }}>
-          nico noal
-        </Link>
-        <ThemeToggle inline />
+    <div className="midia-kit">
+      <div className="mk-masthead">
+        <Link to="/" className="mk-wordmark">NICO&nbsp;NOAL</Link>
+        <div className="mk-masthead-right">
+          <div className="mk-swatches"><span className="mk-swatch blue" /><span className="mk-swatch red" /><span className="mk-swatch mustard" /></div>
+          <div className="mk-masthead-meta">
+            <div className="l1 mk-mono">MÍDIA&nbsp;KIT</div>
+            <div className="l2 mk-mono">ED.&nbsp;2026&nbsp;·&nbsp;POA/RS</div>
+          </div>
+        </div>
+      </div>
+      <div className="mk-rule" />
+      <div className="mk-index-strip mk-mono">
+        <span><b>01</b> SOBRE</span>
+        <span><b>02</b> INSTAGRAM</span>
+        <span><b>03</b> TIKTOK</span>
+        <span><b>04</b> AUDIÊNCIA</span>
+        <span><b>05</b> PROVA&nbsp;SOCIAL</span>
+        <span><b>06</b> PARCEIROS</span>
+        <span><b>07</b> CONTATO</span>
+      </div>
+      <div className="mk-rule" />
+
+      {/* HERO */}
+      <div className="mk-hero">
+        <div className="mk-shell">
+          <div className="mk-hero-grid">
+            <div className="mk-hero-copy">
+              <span className="mk-eyebrow mk-hero-tag">{c.hero_eyebrow}</span>
+              <div className="mk-hero-stack">
+                <h1 className="w">{c.hero_line1}</h1>
+                <h1 className="w blur-echo">{c.hero_line2}</h1>
+                <h1 className="w accent">{c.hero_line3}</h1>
+              </div>
+              <p className="mk-hero-caption mk-mono">{c.hero_caption}</p>
+              <div className="mk-annot mk-mono">(role para ver os números) ↓</div>
+            </div>
+            <div className="mk-hero-photo-wrap">
+              <div className="mk-hero-orb-accent" aria-hidden="true" />
+              {c.hero_photo_url ? (
+                <div className="mk-photo-slot dark has-image">
+                  <img src={c.hero_photo_url} alt="Retrato do Nico" />
+                  <span className="mk-cm tl" /><span className="mk-cm tr" /><span className="mk-cm bl" /><span className="mk-cm br" />
+                </div>
+              ) : (
+                <div className="mk-photo-slot dark">
+                  <span className="mk-cm tl" /><span className="mk-cm tr" /><span className="mk-cm bl" /><span className="mk-cm br" />
+                  <span className="ps-label mk-mono">FOTO — NICO</span>
+                </div>
+              )}
+              <div className="mk-photo-caption mk-mono">FOTO — NICO</div>
+            </div>
+          </div>
+        </div>
+        <div className="mk-hero-vert mk-mono">MÍDIA KIT · 2026</div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-6 pb-24">
-        {/* Hero */}
-        <div className="flex flex-col items-center text-center pt-6 pb-14">
-          <img src={NICO_PHOTO} alt="Nico" className="w-20 h-20 rounded-full object-cover mb-5" style={{ border: '3px solid var(--accent)' }} />
-          <span className="text-[11px] font-semibold tracking-[0.18em] uppercase mb-3" style={{ color: 'var(--accent)' }}>
-            Mídia Kit
-          </span>
-          <h1 className="font-title font-black text-3xl md:text-4xl mb-3" style={{ color: 'var(--text)' }}>
-            comunico, crio &amp; influencio 🌐
-          </h1>
-          <p className="max-w-md text-base leading-relaxed" style={{ color: 'var(--text2)' }}>
-            sobre duas coisas que eu amo muito: <strong style={{ color: 'var(--text)' }}>moda e criatividade</strong>
-          </p>
-          <div className="flex items-center gap-3 mt-6">
-            {SOCIALS.map(s => (
-              <a key={s.label} href={s.href} target="_blank" rel="noreferrer" aria-label={s.label}
-                className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-150"
-                style={{ background: 'var(--bg2)', border: '1px solid var(--border)', color: 'var(--text2)' }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--accent)' }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text2)' }}>
-                {s.icon}
-              </a>
-            ))}
+      {/* 01 SOBRE */}
+      <div className="mk-section on-paper mk-reveal">
+        <div className="mk-shell">
+          <div className="mk-section-head">
+            <div className="mk-section-num">01</div>
+            <div>
+              <span className="mk-eyebrow">{c.sobre_eyebrow}</span>
+              <h2 className="mk-section-title">{c.sobre_title}</h2>
+            </div>
+          </div>
+          <div className="mk-sobre-body">
+            <p>{c.sobre_paragraph_1}</p>
+            <p>{c.sobre_paragraph_2}</p>
+          </div>
+
+          {items.length > 0 ? (
+            <div className="mk-carousel-wrap">
+              <span className="mk-eyebrow mk-carousel-label">Alguns conteúdos</span>
+              <div className="mk-carousel-viewport">
+                <div className="mk-carousel">
+                  {carouselItems.map((item, i) => (
+                    <a key={item.id + '-' + i} className="mk-car-item" href={item.linkUrl || undefined}
+                      target={item.linkUrl ? '_blank' : undefined} rel="noreferrer">
+                      <span className="mk-car-tag mk-mono">{String((i % items.length) + 1).padStart(2, '0')}</span>
+                      <img src={item.mediaUrl} alt={`Conteúdo ${i + 1}`} loading="lazy" />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : !pageLoading && (
+            <div className="mk-carousel-wrap">
+              <span className="mk-eyebrow mk-carousel-label">Alguns conteúdos</span>
+              <p style={{ fontSize: '0.85rem', color: 'var(--mk-ink-dim)' }}>
+                Nenhum conteúdo adicionado ainda — adicione pelo painel em Landing Pages → Mídia Kit.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="mk-rule" />
+
+      {/* 02/03 INSIGHTS */}
+      <div className="mk-section on-dark mk-reveal">
+        <div className="mk-shell">
+          <div className="mk-section-head">
+            <div className="mk-section-num">02</div>
+            <div>
+              <span className="mk-eyebrow">Sente o impacto</span>
+              <h2 className="mk-section-title">Performance nas redes</h2>
+              <p className="mk-section-desc">Números reais, direto da base de dados da plataforma — atualizados automaticamente.</p>
+            </div>
+          </div>
+          <PlatformBlock platform="instagram" label="Instagram" handle="@niconoal" stats={stats?.instagram} loading={statsLoading} error={statsError} />
+          <PlatformBlock platform="tiktok" label="TikTok" handle="@niconoal" stats={stats?.tiktok} loading={statsLoading} error={statsError} />
+        </div>
+      </div>
+
+      <div className="mk-rule" />
+
+      {/* 04 AUDIENCIA */}
+      <div className="mk-section on-paper mk-reveal">
+        <div className="mk-shell">
+          <div className="mk-section-head">
+            <div className="mk-section-num">04</div>
+            <div>
+              <span className="mk-eyebrow">Quem acompanha</span>
+              <h2 className="mk-section-title">Audience Insights</h2>
+              <p className="mk-section-desc">Dados demográficos da audiência — em implementação.</p>
+            </div>
+          </div>
+          <div className="mk-cs-grid">
+            <ComingSoonCard icon={<BauhausDots />} title="Gênero" desc="Distribuição por gênero" />
+            <ComingSoonCard icon={<BauhausDots />} title="Faixa etária" desc="Idade predominante" />
+            <ComingSoonCard icon={<BauhausDots />} title="Localização" desc="Principais cidades/estados" />
+            <ComingSoonCard icon={<BauhausDots />} title="Interesses" desc="Temas de maior afinidade" />
           </div>
         </div>
+      </div>
 
-        {/* Quem é o Nico */}
-        <div className="mb-14">
-          <SectionTitle eyebrow="Quem é o ele" title="Autenticidade e ousadia em pessoa 🖤" />
-          <div className="space-y-3 text-sm leading-relaxed" style={{ color: 'var(--text2)' }}>
-            <p>Para o Nico, a vida é um palco onde cada escolha é uma chance de deixar sua marca. Com <strong style={{ color: 'var(--text)' }}>looks icônicos, humor afiado e uma energia contagiante</strong>, ele inspira todo mundo ao redor com criatividade, sempre buscando o extraordinário em tudo o que faz.</p>
-            <p>Fala (muito) sobre como se <strong style={{ color: 'var(--text)' }}>expressar através da moda</strong> está para aquilo que nos faz bem. Cria conteúdos extremamente lapidados e originais, mas também surfa em trends — sempre dando seu toque — compartilhando seu lifestyle de forma a inspirar quem se conecta com essa mistura única.</p>
+      <div className="mk-rule" />
+
+      {/* 05 PROVA SOCIAL */}
+      <div className="mk-section on-paper-2 mk-reveal">
+        <div className="mk-shell">
+          <div className="mk-section-head">
+            <div className="mk-section-num">05</div>
+            <div>
+              <span className="mk-eyebrow">Prova social</span>
+              <h2 className="mk-section-title">O que a comunidade diz</h2>
+              <p className="mk-section-desc">Nico possui uma comunidade extremamente engajada que vibra e aprecia cada conteúdo publicado.</p>
+            </div>
+          </div>
+          <div style={{ maxWidth: 420, margin: '0 auto' }}>
+            <ComingSoonCard icon={<div className="mk-halftone-block" />} title="Depoimentos" desc="Prints e comentários reais de seguidores em breve por aqui." />
           </div>
         </div>
+      </div>
 
-        {/* Instagram + TikTok Insights */}
-        <div className="mb-14">
-          <SectionTitle eyebrow="Sente o impacto" title="Performance nas redes 🔥"
-            desc="Números reais, direto da base de dados da plataforma — atualizados automaticamente." />
-          <div className="space-y-4">
-            <PlatformSection platform="instagram" label="Instagram" handle="@niconoal" icon="📸"
-              stats={data?.instagram} loading={loading} error={error} />
-            <PlatformSection platform="tiktok" label="TikTok" handle="@niconoal" icon="🎵"
-              stats={data?.tiktok} loading={loading} error={error} />
+      <div className="mk-rule" />
+
+      {/* 06 PARCEIROS */}
+      <div className="mk-section on-paper mk-reveal">
+        <div className="mk-shell">
+          <div className="mk-section-head">
+            <div className="mk-section-num">06</div>
+            <div>
+              <span className="mk-eyebrow">Nico e seus parceiros</span>
+              <h2 className="mk-section-title">Marcas que já colaboraram</h2>
+              <p className="mk-section-desc">Não é só moda por moda ou look por look — é através de (muita) criatividade, levando inspirações para quem não liga e nem acredita nas imposições de moda por aí.</p>
+            </div>
+          </div>
+          <div className="mk-tag-row">
+            {[1, 2, 3, 4, 5].map(n => <div key={n} className="mk-tag-chip">marca {String(n).padStart(2, '0')}</div>)}
           </div>
         </div>
+      </div>
 
-        {/* Audience Insights (preview) */}
-        <div className="mb-14">
-          <SectionTitle eyebrow="Quem acompanha" title="Audience Insights"
-            desc="Dados demográficos da audiência — em implementação." />
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <ComingSoonCard icon="🚻" title="Gênero" desc="Distribuição por gênero" />
-            <ComingSoonCard icon="🎂" title="Faixa etária" desc="Idade predominante" />
-            <ComingSoonCard icon="📍" title="Localização" desc="Principais cidades/estados" />
-            <ComingSoonCard icon="💬" title="Interesses" desc="Temas de maior afinidade" />
-          </div>
-        </div>
-
-        {/* Depoimentos */}
-        <div className="mb-14">
-          <SectionTitle eyebrow="Prova social" title="O que a comunidade diz"
-            desc="Nico possui uma comunidade extremamente engajada que vibra e aprecia cada conteúdo publicado." />
-          <ComingSoonCard icon="💬" title="Depoimentos" desc="Prints e comentários reais de seguidores em breve por aqui." />
-        </div>
-
-        {/* Marcas parceiras */}
-        <div className="mb-16">
-          <SectionTitle eyebrow="Nico e seus parceiros" title="Marcas que já colaboraram 🤝"
-            desc="Não é só moda por moda ou look por look — é através de (muita) criatividade, levando inspirações para quem não liga e nem acredita nas imposições de moda por aí." />
-          <ComingSoonCard icon="🏷️" title="Marcas parceiras" desc="Logos das marcas que já colaboraram com o Nico em breve por aqui." />
-        </div>
-
-        {/* CTA final */}
-        <div className="rounded-3xl p-8 md:p-10 text-center" style={{ background: 'var(--bg2)', border: '1px solid var(--border2)' }}>
-          <h2 className="font-title font-black text-2xl mb-2" style={{ color: 'var(--text)' }}>bora conversar? ⭐</h2>
-          <p className="text-sm mb-6" style={{ color: 'var(--text2)' }}>Vamos construir uma parceria de sucesso!</p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <a href={WHATSAPP_URL} target="_blank" rel="noreferrer" className="btn-primary w-full sm:w-auto flex items-center justify-center gap-2">
+      {/* 07 CONTATO */}
+      <div className="mk-section mk-contact mk-reveal">
+        <div className="mk-shell">
+          <span className="mk-eyebrow" style={{ color: 'var(--mk-chrome-1)' }}>07 · Contato</span>
+          <h2 className="mk-contact-stack" style={{ marginTop: 14 }}>{c.contact_title}</h2>
+          <p className="mk-contact-sub">{c.contact_subtitle}</p>
+          <div className="mk-cta-row">
+            <a className="mk-btn mk-btn-solid" href={c.whatsapp_url} target="_blank" rel="noreferrer">
               <WhatsAppIcon /> Chama no WhatsApp
             </a>
-            <a href={EMAIL_URL} className="btn-ghost w-full sm:w-auto flex items-center justify-center gap-2">
+            <a className="mk-btn mk-btn-outline" href={`mailto:${c.email}`}>
               <MailIcon /> Manda um e-mail
             </a>
+          </div>
+          <div className="mk-foot-meta mk-mono">
+            {SOCIALS.map(s => <a key={s.label} href={s.href} target="_blank" rel="noreferrer">{s.label.toUpperCase()}</a>)}
+            <span>NICO NOAL © 2026</span>
           </div>
         </div>
       </div>
