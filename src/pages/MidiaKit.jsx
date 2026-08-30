@@ -4,8 +4,16 @@ import './MidiaKit.css'
 import { useLandingPage } from '@/hooks/useLandingPages'
 import { SOCIALS, WhatsAppIcon, MailIcon } from '@/components/SocialIcons'
 import { fmtN, PLAT_COLOR } from '@/pages/metricas/shared.js'
+import { isVideoUrl } from '@/lib/media'
 
 const STATS_URL = 'https://rciywgiuktjipcjtmrzw.supabase.co/functions/v1/midia-kit'
+const MIN_FOR_LOOP = 4
+
+function MediaThumb({ src, alt, className }) {
+  return isVideoUrl(src)
+    ? <video className={className} src={src} autoPlay muted loop playsInline />
+    : <img className={className} src={src} alt={alt} loading="lazy" />
+}
 
 const DEFAULT_CONTENT = {
   hero_eyebrow: 'criadora de conteúdo · moda & estilo',
@@ -117,14 +125,17 @@ function BauhausDots() {
 }
 
 export default function MidiaKitPage() {
-  const { page, items, loading: pageLoading } = useLandingPage('midia-kit')
+  const { page, items, testimonials, loading: pageLoading } = useLandingPage('midia-kit')
   const { data: stats, status } = useMidiaKitStats()
   const statsLoading = status === 'loading'
   const statsError = status === 'error'
   useReveal()
 
   const c = page?.content && Object.keys(page.content).length ? page.content : DEFAULT_CONTENT
-  const carouselItems = items.length ? [...items, ...items] : []
+  const loopsCarousel = items.length >= MIN_FOR_LOOP
+  const carouselItems = loopsCarousel ? [...items, ...items] : items
+  const loopsTestimonials = testimonials.length >= MIN_FOR_LOOP
+  const testimonialItems = loopsTestimonials ? [...testimonials, ...testimonials] : testimonials
 
   return (
     <div className="midia-kit">
@@ -203,12 +214,12 @@ export default function MidiaKitPage() {
             <div className="mk-carousel-wrap">
               <span className="mk-eyebrow mk-carousel-label">Alguns conteúdos</span>
               <div className="mk-carousel-viewport">
-                <div className="mk-carousel">
+                <div className={`mk-carousel${loopsCarousel ? '' : ' no-loop'}`}>
                   {carouselItems.map((item, i) => (
                     <a key={item.id + '-' + i} className="mk-car-item" href={item.linkUrl || undefined}
                       target={item.linkUrl ? '_blank' : undefined} rel="noreferrer">
                       <span className="mk-car-tag mk-mono">{String((i % items.length) + 1).padStart(2, '0')}</span>
-                      <img src={item.mediaUrl} alt={`Conteúdo ${i + 1}`} loading="lazy" />
+                      <MediaThumb src={item.mediaUrl} alt={`Conteúdo ${i + 1}`} />
                     </a>
                   ))}
                 </div>
@@ -278,9 +289,37 @@ export default function MidiaKitPage() {
               <p className="mk-section-desc">Nico possui uma comunidade extremamente engajada que vibra e aprecia cada conteúdo publicado.</p>
             </div>
           </div>
-          <div style={{ maxWidth: 420, margin: '0 auto' }}>
-            <ComingSoonCard icon={<div className="mk-halftone-block" />} title="Depoimentos" desc="Prints e comentários reais de seguidores em breve por aqui." />
-          </div>
+          {testimonials.length > 0 ? (
+            <div className="mk-carousel-viewport">
+              <div className={`mk-carousel${loopsTestimonials ? '' : ' no-loop'}`}>
+                {testimonialItems.map((t, i) => (
+                  <div key={t.id + '-' + i} className="mk-testimonial-card">
+                    <div className="mk-testimonial-head">
+                      {t.avatarUrl ? (
+                        <img className="mk-testimonial-avatar" src={t.avatarUrl} alt={t.name} />
+                      ) : (
+                        <div className="mk-testimonial-avatar mk-testimonial-initial">{t.name.slice(0, 1).toUpperCase()}</div>
+                      )}
+                      <div className="mk-testimonial-name-row">
+                        <div>
+                          <div className="mk-testimonial-name">{t.name}</div>
+                          <div className="mk-testimonial-handle mk-mono">@{t.handle}</div>
+                        </div>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" style={{ flexShrink: 0, opacity: 0.5 }}>
+                          <rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none" />
+                        </svg>
+                      </div>
+                    </div>
+                    <p className="mk-testimonial-comment">{t.comment}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : !pageLoading && (
+            <p style={{ fontSize: '0.85rem', color: 'var(--mk-ink-dim)', textAlign: 'center' }}>
+              Nenhum depoimento adicionado ainda — adicione pelo painel em Landing Pages → Mídia Kit.
+            </p>
+          )}
         </div>
       </div>
 
