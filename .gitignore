@@ -3,3 +3,4 @@ dist
 .vite
 .env
 .env.local
+src/images
