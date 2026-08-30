@@ -33,6 +33,22 @@ function sum(rows: any[], key: string) {
   return rows.reduce((s, m) => s + (m[key] || 0), 0)
 }
 
+function pctChange(curr: number, prev: number): number | null {
+  if (!prev) return null
+  return Number((((curr - prev) / prev) * 100).toFixed(1))
+}
+
+// stats de uma janela de dias, sem "melhor formato" (usado só pro comparativo)
+function windowStats(rows: any[]) {
+  return {
+    postsAnalyzed: rows.length,
+    avgViews: avg(rows, 'views'),
+    avgEngagementPct: avgEngagement(rows),
+    totalReach: sum(rows, 'alcance'),
+    totalViews: sum(rows, 'views'),
+  }
+}
+
 function followerStats(seguidores: any[], plataforma: string) {
   const rows = seguidores
     .filter(s => s.plataforma === plataforma)
@@ -68,6 +84,17 @@ function platformStats(rows: any[], platform: string) {
     }
   })
 
+  const cutoff30 = isoDaysAgo(GROWTH_WINDOW_DAYS)
+  const cutoff60 = isoDaysAgo(GROWTH_WINDOW_DAYS * 2)
+  const last30 = windowStats(rows.filter(m => m.data_ref >= cutoff30))
+  const prior30 = windowStats(rows.filter(m => m.data_ref >= cutoff60 && m.data_ref < cutoff30))
+
+  const totalReach = sum(rows, 'alcance')
+  // "Alcance total" na tela cai pra totalViews quando não há alcance (TikTok) — o comparativo segue a mesma métrica exibida
+  const reachGrowth = totalReach > 0
+    ? pctChange(last30.totalReach, prior30.totalReach)
+    : pctChange(last30.totalViews, prior30.totalViews)
+
   return {
     postsAnalyzed: rows.length,
     avgViews: avg(rows, 'views'),
@@ -75,8 +102,12 @@ function platformStats(rows: any[], platform: string) {
     avgComments: avg(rows, 'comentarios'),
     avgEngagementPct: avgEngagement(rows),
     totalViews: sum(rows, 'views'),
-    totalReach: sum(rows, 'alcance'),
+    totalReach,
     topFormat,
+    postsAnalyzedGrowthPct30d: pctChange(last30.postsAnalyzed, prior30.postsAnalyzed),
+    avgViewsGrowthPct30d: pctChange(last30.avgViews, prior30.avgViews),
+    avgEngagementGrowthPct30d: pctChange(last30.avgEngagementPct, prior30.avgEngagementPct),
+    totalReachGrowthPct30d: reachGrowth,
   }
 }
 

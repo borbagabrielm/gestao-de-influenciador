@@ -87,22 +87,30 @@ function useReveal() {
   return ref
 }
 
-function StatTile({ value, label, sub, loading }) {
+function growthLabel(pct) {
+  if (pct == null) return null
+  const dir = pct >= 0 ? 'up' : 'down'
+  return { text: `${pct >= 0 ? '↑' : '↓'} ${Math.abs(pct)}% em 30d`, dir }
+}
+
+function StatTile({ value, label, growthPct, loading }) {
+  const growth = growthLabel(growthPct)
   return (
     <div className="mk-pstat">
       <span className={`num${loading ? ' mk-skel' : ''}`}>{loading ? '—' : value}</span>
       <span className="lbl">{label}</span>
-      {sub && !loading && <span className="sub">{sub}</span>}
+      {growth && !loading && <span className={`sub ${growth.dir}`}>{growth.text}</span>}
     </div>
   )
 }
 
-function PlatformBlock({ platform, label, handle, stats, loading, error }) {
-  const growth = stats?.growthPct30d
+function PlatformBlock({ platform, label, handle, icon, stats, loading, error }) {
+  const cls = platform === 'instagram' ? 'ig' : 'tt'
   return (
-    <div className="mk-platform">
+    <div className={`mk-platform ${cls}`}>
       <div className="mk-platform-head">
-        <div className={`bar ${platform === 'instagram' ? 'ig' : 'tt'}`} />
+        <div className={`bar ${cls}`} />
+        <div className="mk-platform-icon">{icon}</div>
         <div>
           <div className="mk-platform-name">{label}</div>
           <div className="mk-platform-handle mk-mono">{handle}</div>
@@ -110,17 +118,21 @@ function PlatformBlock({ platform, label, handle, stats, loading, error }) {
         <div className="mk-platform-period mk-eyebrow">últimos 90 dias</div>
       </div>
       {error ? (
-        <div style={{ padding: 24, textAlign: 'center', fontSize: '0.85rem', color: 'var(--mk-cream-dim)' }}>
+        <div style={{ padding: 24, textAlign: 'center', fontSize: '0.85rem', color: 'var(--mk-ink-dim)' }}>
           Estamos atualizando esses números — volte em breve
         </div>
       ) : (
         <div className="mk-platform-stats">
           <StatTile loading={loading} value={stats?.followers != null ? fmtN(stats.followers) : '—'} label="Seguidores"
-            sub={growth != null ? `${growth >= 0 ? '↑' : '↓'} ${Math.abs(growth)}% em 30d` : null} />
-          <StatTile loading={loading} value={stats?.avgEngagementPct != null ? `${stats.avgEngagementPct}%` : '—'} label="Engajamento médio" />
-          <StatTile loading={loading} value={stats?.avgViews != null ? fmtN(stats.avgViews) : '—'} label="Views médias" />
-          <StatTile loading={loading} value={stats?.postsAnalyzed ?? '—'} label="Posts analisados" />
-          <StatTile loading={loading} value={stats?.totalReach ? fmtN(stats.totalReach) : (stats?.totalViews ? fmtN(stats.totalViews) : '—')} label="Alcance total" />
+            growthPct={stats?.growthPct30d} />
+          <StatTile loading={loading} value={stats?.avgEngagementPct != null ? `${stats.avgEngagementPct}%` : '—'} label="Engajamento médio"
+            growthPct={stats?.avgEngagementGrowthPct30d} />
+          <StatTile loading={loading} value={stats?.avgViews != null ? fmtN(stats.avgViews) : '—'} label="Views médias"
+            growthPct={stats?.avgViewsGrowthPct30d} />
+          <StatTile loading={loading} value={stats?.postsAnalyzed ?? '—'} label="Posts analisados"
+            growthPct={stats?.postsAnalyzedGrowthPct30d} />
+          <StatTile loading={loading} value={stats?.totalReach ? fmtN(stats.totalReach) : (stats?.totalViews ? fmtN(stats.totalViews) : '—')} label="Alcance total"
+            growthPct={stats?.totalReachGrowthPct30d} />
           <StatTile loading={loading} value={stats?.topFormat?.label?.toUpperCase() || '—'} label="Melhor formato" />
         </div>
       )}
@@ -275,8 +287,8 @@ export default function MidiaKitPage() {
               <p className="mk-section-desc">Números reais, direto da base de dados da plataforma — atualizados automaticamente.</p>
             </div>
           </div>
-          <PlatformBlock platform="instagram" label="Instagram" handle="@niconoal" stats={stats?.instagram} loading={statsLoading} error={statsError} />
-          <PlatformBlock platform="tiktok" label="TikTok" handle="@niconoal" stats={stats?.tiktok} loading={statsLoading} error={statsError} />
+          <PlatformBlock platform="instagram" label="Instagram" handle="@niconoal" icon="📸" stats={stats?.instagram} loading={statsLoading} error={statsError} />
+          <PlatformBlock platform="tiktok" label="TikTok" handle="@niconoal" icon="🎵" stats={stats?.tiktok} loading={statsLoading} error={statsError} />
         </div>
       </div>
 
