@@ -125,7 +125,7 @@ function BauhausDots() {
 }
 
 export default function MidiaKitPage() {
-  const { page, items, testimonials, loading: pageLoading } = useLandingPage('midia-kit')
+  const { page, items, testimonials, brands, loading: pageLoading } = useLandingPage('midia-kit')
   const { data: stats, status } = useMidiaKitStats()
   const statsLoading = status === 'loading'
   const statsError = status === 'error'
@@ -136,6 +136,8 @@ export default function MidiaKitPage() {
   const carouselItems = loopsCarousel ? [...items, ...items] : items
   const loopsTestimonials = testimonials.length >= MIN_FOR_LOOP
   const testimonialItems = loopsTestimonials ? [...testimonials, ...testimonials] : testimonials
+  const loopsBrands = brands.length >= MIN_FOR_LOOP
+  const brandItems = loopsBrands ? [...brands, ...brands] : brands
 
   return (
     <div className="midia-kit">
@@ -336,9 +338,22 @@ export default function MidiaKitPage() {
               <p className="mk-section-desc">Não é só moda por moda ou look por look — é através de (muita) criatividade, levando inspirações para quem não liga e nem acredita nas imposições de moda por aí.</p>
             </div>
           </div>
-          <div className="mk-tag-row">
-            {[1, 2, 3, 4, 5].map(n => <div key={n} className="mk-tag-chip">marca {String(n).padStart(2, '0')}</div>)}
-          </div>
+          {brands.length > 0 ? (
+            <div className="mk-carousel-viewport">
+              <div className={`mk-carousel${loopsBrands ? '' : ' no-loop'}`}>
+                {brandItems.map((b, i) => (
+                  <a key={b.id + '-' + i} className="mk-brand-item" href={b.linkUrl || undefined}
+                    target={b.linkUrl ? '_blank' : undefined} rel="noreferrer">
+                    <img src={b.logoUrl} alt={b.name || 'Marca parceira'} loading="lazy" />
+                  </a>
+                ))}
+              </div>
+            </div>
+          ) : !pageLoading && (
+            <p style={{ fontSize: '0.85rem', color: 'var(--mk-ink-dim)', textAlign: 'center' }}>
+              Nenhuma marca adicionada ainda — adicione pelo painel em Landing Pages → Mídia Kit.
+            </p>
+          )}
         </div>
       </div>
 

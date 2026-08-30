@@ -245,12 +245,16 @@
   opacity: 0.35;
 }
 
-.midia-kit .mk-tag-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
-.midia-kit .mk-tag-chip {
-  border: 1px dashed var(--mk-ink-dim); padding: 14px 22px;
-  font-family: 'Space Mono', monospace; font-size: 0.66rem; letter-spacing: 0.08em; color: var(--mk-ink-dim);
-  text-transform: uppercase;
+.midia-kit .mk-brand-item {
+  flex: 0 0 auto;
+  width: clamp(120px, 14vw, 160px);
+  aspect-ratio: 3/2;
+  border: 1px solid var(--mk-paper-line);
+  background: var(--mk-paper);
+  display: flex; align-items: center; justify-content: center;
+  padding: 18px;
 }
+.midia-kit .mk-brand-item img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
 /* ---------- depoimentos (comentários estilo Instagram) ---------- */
 .midia-kit .mk-testimonial-card {

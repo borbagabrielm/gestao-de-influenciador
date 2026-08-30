@@ -69,10 +69,11 @@ export default function LandingPageEditor() {
   const { slug } = useParams()
   const toast = useToast()
   const {
-    page, items, testimonials, loading,
+    page, items, testimonials, brands, loading,
     saveContent, uploadMedia,
     addCarouselItem, updateCarouselItem, removeCarouselItem, reorderCarouselItem,
     addTestimonial, updateTestimonial, removeTestimonial, reorderTestimonial,
+    addBrand, updateBrand, removeBrand, reorderBrand,
   } = useLandingPage(slug)
 
   const [form, setForm] = useState(null)
@@ -82,9 +83,11 @@ export default function LandingPageEditor() {
   const [newTestimonial, setNewTestimonial] = useState({ avatarUrl: '', name: '', handle: '', comment: '' })
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [addingTestimonial, setAddingTestimonial] = useState(false)
+  const [uploadingBrands, setUploadingBrands] = useState(false)
   const heroFileRef = useRef(null)
   const itemsFileRef = useRef(null)
   const avatarFileRef = useRef(null)
+  const brandsFileRef = useRef(null)
 
   useEffect(() => { if (page) setForm(page.content) }, [page])
 
@@ -159,8 +162,24 @@ export default function LandingPageEditor() {
     setAddingTestimonial(false)
   }
 
+  const handleBrandsUpload = async (e) => {
+    const files = Array.from(e.target.files || [])
+    if (!files.length) return
+    setUploadingBrands(true)
+    try {
+      for (const file of files) {
+        const url = await uploadMedia(file)
+        await addBrand(url, '', '')
+      }
+      toast.success(`✓ ${files.length} marca(s) adicionada(s)`)
+    } catch (err) { toast.error('Erro no upload: ' + err.message) }
+    setUploadingBrands(false)
+    e.target.value = ''
+  }
+
   const sortedItems = [...items].sort((a, b) => a.position - b.position)
   const sortedTestimonials = [...testimonials].sort((a, b) => a.position - b.position)
+  const sortedBrands = [...brands].sort((a, b) => a.position - b.position)
 
   return (
     <div className="max-w-3xl space-y-6">
@@ -279,6 +298,37 @@ export default function LandingPageEditor() {
             {addingTestimonial ? 'Adicionando...' : '+ Adicionar depoimento'}
           </button>
         </div>
+      </div>
+
+      {/* Marcas parceiras */}
+      <div className="card">
+        <div className="flex items-center justify-between mb-4">
+          <div className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Marcas parceiras ({sortedBrands.length})</div>
+          <input ref={brandsFileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleBrandsUpload} />
+          <button className="btn-ghost" onClick={() => brandsFileRef.current?.click()} disabled={uploadingBrands}>
+            {uploadingBrands ? 'Enviando...' : '+ Adicionar logo(s)'}
+          </button>
+        </div>
+
+        {sortedBrands.length === 0 ? (
+          <p className="text-xs" style={{ color: 'var(--text3)' }}>Nenhuma marca adicionada ainda.</p>
+        ) : (
+          <div className="space-y-2.5">
+            {sortedBrands.map((b, i) => (
+              <div key={b.id} className="flex items-center gap-3 p-2.5 rounded-lg" style={{ background: 'var(--bg3)' }}>
+                <img src={b.logoUrl} alt="" className="w-14 h-10 rounded object-contain flex-shrink-0 p-1" style={{ background: 'var(--bg2)' }} />
+                <input className="form-input text-xs" style={{ width: 140 }} placeholder="Nome da marca"
+                  value={b.name} onChange={e => updateBrand(b.id, { name: e.target.value })} />
+                <input className="form-input flex-1 text-xs" placeholder="Link do site/Instagram (opcional)"
+                  value={b.linkUrl} onChange={e => updateBrand(b.id, { linkUrl: e.target.value })} />
+                <ReorderButtons index={i} total={sortedBrands.length} confirmLabel="Remover esta marca?"
+                  onUp={() => reorderBrand(b.id, 'up')}
+                  onDown={() => reorderBrand(b.id, 'down')}
+                  onRemove={() => removeBrand(b.id)} />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

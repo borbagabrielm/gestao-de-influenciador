@@ -29,6 +29,15 @@ const testimonialFromDB = r => ({
   position: r.position,
 })
 
+const brandFromDB = r => ({
+  id: r.id,
+  landingPageId: r.landing_page_id,
+  logoUrl: r.logo_url,
+  name: r.name || '',
+  linkUrl: r.link_url || '',
+  position: r.position,
+})
+
 // ── helpers genéricos de reordenação (reusados por carrossel e depoimentos) ──
 function usePositionedCollection(table, setState) {
   const reorder = async (items, id, direction) => {
@@ -82,6 +91,7 @@ export function useLandingPage(slug) {
   const [page, setPage] = useState(null)
   const [items, setItems] = useState([])
   const [testimonials, setTestimonials] = useState([])
+  const [brands, setBrands] = useState([])
   const [loading, setLoading] = useState(true)
 
   const load = useCallback(async () => {
@@ -91,14 +101,17 @@ export function useLandingPage(slug) {
       .from('landing_pages').select('*').eq('slug', slug).single()
     if (!pageErr && pageRow) {
       setPage(fromDB(pageRow))
-      const [{ data: itemRows }, { data: testimonialRows }] = await Promise.all([
+      const [{ data: itemRows }, { data: testimonialRows }, { data: brandRows }] = await Promise.all([
         supabase.from('landing_page_carousel_items').select('*')
           .eq('landing_page_id', pageRow.id).order('position', { ascending: true }),
         supabase.from('landing_page_testimonials').select('*')
           .eq('landing_page_id', pageRow.id).order('position', { ascending: true }),
+        supabase.from('landing_page_brands').select('*')
+          .eq('landing_page_id', pageRow.id).order('position', { ascending: true }),
       ])
       setItems((itemRows || []).map(itemFromDB))
       setTestimonials((testimonialRows || []).map(testimonialFromDB))
+      setBrands((brandRows || []).map(brandFromDB))
     }
     setLoading(false)
   }, [slug])
@@ -177,10 +190,38 @@ export function useLandingPage(slug) {
   const removeTestimonial = testimonialHelpers.remove
   const reorderTestimonial = (id, direction) => testimonialHelpers.reorder(testimonials, id, direction)
 
+  // ── marcas parceiras ──
+  const brandHelpers = usePositionedCollection('landing_page_brands', setBrands)
+
+  const addBrand = async (logoUrl, name = '', linkUrl = '') => {
+    const position = brands.length ? Math.max(...brands.map(b => b.position)) + 1 : 0
+    const { data, error } = await supabase
+      .from('landing_page_brands')
+      .insert({ landing_page_id: page.id, logo_url: logoUrl, name, link_url: linkUrl || null, position })
+      .select().single()
+    if (error) throw error
+    setBrands(prev => [...prev, brandFromDB(data)])
+  }
+
+  const updateBrand = async (id, fields) => {
+    const row = {}
+    if (fields.logoUrl !== undefined) row.logo_url = fields.logoUrl
+    if (fields.name !== undefined) row.name = fields.name
+    if (fields.linkUrl !== undefined) row.link_url = fields.linkUrl || null
+    if (fields.position !== undefined) row.position = fields.position
+    const { error } = await supabase.from('landing_page_brands').update(row).eq('id', id)
+    if (error) throw error
+    setBrands(prev => prev.map(b => b.id === id ? { ...b, ...fields } : b))
+  }
+
+  const removeBrand = brandHelpers.remove
+  const reorderBrand = (id, direction) => brandHelpers.reorder(brands, id, direction)
+
   return {
-    page, items, testimonials, loading, reload: load,
+    page, items, testimonials, brands, loading, reload: load,
     saveContent, uploadMedia,
     addCarouselItem, updateCarouselItem, removeCarouselItem, reorderCarouselItem,
     addTestimonial, updateTestimonial, removeTestimonial, reorderTestimonial,
+    addBrand, updateBrand, removeBrand, reorderBrand,
   }
 }
