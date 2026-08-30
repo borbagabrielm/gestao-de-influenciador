@@ -229,28 +229,15 @@
   .midia-kit .mk-pstat:nth-child(2n+1) { border-left: none; }
 }
 
-/* ---------- coming soon grid ---------- */
-.midia-kit .mk-cs-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--mk-paper-line); border: 1px solid var(--mk-paper-line); }
-.midia-kit .mk-cs-card { background: var(--mk-paper); padding: 26px 18px; text-align: center; }
-.midia-kit .mk-cs-icon-wrap { display: flex; justify-content: center; margin-bottom: 14px; }
-.midia-kit .mk-cs-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.92rem; margin-bottom: 4px; }
-.midia-kit .mk-cs-desc { font-size: 0.72rem; color: var(--mk-ink-dim); }
-.midia-kit .mk-cs-tag {
-  display: inline-block; margin-top: 12px;
-  font-family: 'Space Mono', monospace; font-size: 0.62rem; letter-spacing: 0.1em;
-  padding: 4px 8px; border: 1px solid var(--mk-ink); text-transform: uppercase;
-}
-@media (max-width: 760px) { .midia-kit .mk-cs-grid { grid-template-columns: repeat(2, 1fr); } }
-
-.midia-kit .mk-bauhaus-dots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; width: 130px; margin: 0 auto; }
-.midia-kit .mk-bh-dot { width: 100%; aspect-ratio: 1; border-radius: 50%; background: var(--mk-cobalt); }
-.midia-kit .mk-bh-dot.pinch { border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%; height: 210%; margin-top: -55%; }
-
-.midia-kit .mk-halftone-block {
-  height: 90px; margin: 0 auto 14px; width: 90%;
-  background-image: radial-gradient(circle, var(--mk-ink) 1px, transparent 1.3px);
-  background-size: 6px 6px;
-  opacity: 0.35;
+/* ---------- audience insights ---------- */
+.midia-kit .mk-audience-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; align-items: start; }
+.midia-kit .mk-platform.aud { --mk-platform-accent: var(--mk-cobalt); margin-bottom: 0; }
+.midia-kit .bar.aud { background: var(--mk-cobalt); }
+.midia-kit .mk-audience-body { padding: 22px; }
+.midia-kit .mk-audience-tag {
+  display: inline-block;
+  font-size: 0.62rem; letter-spacing: 0.1em;
+  padding: 4px 8px; border: 1px solid var(--mk-ink-dim); color: var(--mk-ink-dim); text-transform: uppercase;
 }
 
 .midia-kit .mk-brand-item {

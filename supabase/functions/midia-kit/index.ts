@@ -129,16 +129,23 @@ serve(async (req) => {
 
     const cutoff = isoDaysAgo(FETCH_WINDOW_DAYS)
 
-    const [{ data: metricas, error: mErr }, { data: seguidores, error: sErr }] = await Promise.all([
+    const [{ data: metricas, error: mErr }, { data: seguidores, error: sErr }, { data: audience, error: aErr }] = await Promise.all([
       supabase.from('metricas').select('plataforma,views,likes,comentarios,compartilhamentos,alcance,data_ref,raw').gte('data_ref', cutoff),
       supabase.from('seguidores').select('plataforma,data_ref,quantidade'),
+      supabase.from('audience_insights').select('category,label,value,position').order('position', { ascending: true }),
     ])
 
     if (mErr) throw mErr
     if (sErr) throw sErr
+    if (aErr) throw aErr
 
     const ig = (metricas || []).filter(m => m.plataforma === 'instagram')
     const tt = (metricas || []).filter(m => m.plataforma === 'tiktok')
+
+    const audienceByCategory = (category: string) =>
+      (audience || [])
+        .filter(a => a.category === category)
+        .map(a => ({ label: a.label, value: a.value }))
 
     const body = {
       generatedAt: new Date().toISOString(),
@@ -150,6 +157,11 @@ serve(async (req) => {
       tiktok: {
         ...followerStats(seguidores || [], 'tiktok'),
         ...(platformStats(tt, 'tiktok') || {}),
+      },
+      audience: {
+        cities: audienceByCategory('city').slice(0, 5),
+        age: audienceByCategory('age'),
+        gender: audienceByCategory('gender'),
       },
     }
 

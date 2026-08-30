@@ -5,6 +5,8 @@ import { useLandingPage } from '@/hooks/useLandingPages'
 import { SOCIALS, WhatsAppIcon, MailIcon } from '@/components/SocialIcons'
 import { fmtN, PLAT_COLOR } from '@/pages/metricas/shared.js'
 import { isVideoUrl } from '@/lib/media'
+import HorizontalBarChart from '@/components/charts/HorizontalBarChart'
+import PieChart from '@/components/charts/PieChart'
 
 const STATS_URL = 'https://rciywgiuktjipcjtmrzw.supabase.co/functions/v1/midia-kit'
 const MIN_FOR_LOOP = 4
@@ -141,21 +143,21 @@ function PlatformBlock({ platform, label, handle, icon, stats, loading, error, s
   )
 }
 
-function ComingSoonCard({ icon, title, desc }) {
+function AudiencePanel({ icon, title, empty, children }) {
   return (
-    <div className="mk-cs-card">
-      <div className="mk-cs-icon-wrap">{icon}</div>
-      <div className="mk-cs-title">{title}</div>
-      <div className="mk-cs-desc">{desc}</div>
-      <span className="mk-cs-tag">Em breve</span>
-    </div>
-  )
-}
-
-function BauhausDots() {
-  return (
-    <div className="mk-bauhaus-dots">
-      <div className="mk-bh-dot" /><div className="mk-bh-dot pinch" /><div className="mk-bh-dot" />
+    <div className="mk-platform aud">
+      <div className="mk-platform-head">
+        <div className="bar aud" />
+        <div className="mk-platform-icon">{icon}</div>
+        <div className="mk-platform-name">{title}</div>
+      </div>
+      <div className="mk-audience-body">
+        {empty ? (
+          <div style={{ textAlign: 'center', padding: '10px 0' }}>
+            <span className="mk-audience-tag mk-mono">Em breve</span>
+          </div>
+        ) : children}
+      </div>
     </div>
   )
 }
@@ -306,11 +308,20 @@ export default function MidiaKitPage() {
               <p className="mk-section-desc">Dados demográficos da audiência — em implementação.</p>
             </div>
           </div>
-          <div className="mk-cs-grid">
-            <ComingSoonCard icon={<BauhausDots />} title="Gênero" desc="Distribuição por gênero" />
-            <ComingSoonCard icon={<BauhausDots />} title="Faixa etária" desc="Idade predominante" />
-            <ComingSoonCard icon={<BauhausDots />} title="Localização" desc="Principais cidades/estados" />
-            <ComingSoonCard icon={<BauhausDots />} title="Interesses" desc="Temas de maior afinidade" />
+          <div className="mk-audience-grid">
+            <AudiencePanel icon="📍" title="Cidades" empty={!stats?.audience?.cities?.length}>
+              <HorizontalBarChart items={stats?.audience?.cities || []} barColor="#2a78d6" trackColor="var(--mk-paper-line)"
+                labelColor="var(--mk-ink-dim)" valueColor="var(--mk-ink)" />
+            </AudiencePanel>
+            <AudiencePanel icon="🎂" title="Faixa etária" empty={!stats?.audience?.age?.length}>
+              <HorizontalBarChart items={stats?.audience?.age || []} barColor="#2a78d6" trackColor="var(--mk-paper-line)"
+                labelColor="var(--mk-ink-dim)" valueColor="var(--mk-ink)" />
+            </AudiencePanel>
+            <AudiencePanel icon="🚻" title="Gênero" empty={!stats?.audience?.gender?.length}>
+              <PieChart
+                items={(stats?.audience?.gender || []).map((d, i) => ({ label: d.label, value: d.value, color: ['#2a78d6', '#e34948'][i % 2] }))}
+                labelColor="var(--mk-ink-dim)" valueColor="var(--mk-ink)" size={120} />
+            </AudiencePanel>
           </div>
         </div>
       </div>
