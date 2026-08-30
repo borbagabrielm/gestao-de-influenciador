@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 
 const fromDB = r => ({
@@ -38,7 +38,7 @@ const brandFromDB = r => ({
   position: r.position,
 })
 
-// ── helpers genéricos de reordenação (reusados por carrossel e depoimentos) ──
+// ── helpers genéricos de reordenação (reusados por carrossel, depoimentos e marcas) ──
 function usePositionedCollection(table, setState) {
   const reorder = async (items, id, direction) => {
     const sorted = [...items].sort((a, b) => a.position - b.position)
@@ -66,6 +66,27 @@ function usePositionedCollection(table, setState) {
   return { reorder, remove }
 }
 
+// Atualiza o estado local na hora (input não trava) e só grava no banco
+// depois de uma pausa na digitação, juntando os campos alterados nesse meio-tempo.
+function useDebouncedUpdate(table, setState) {
+  const timers = useRef({})
+  const pending = useRef({})
+
+  return (id, fields, toRow) => {
+    setState(prev => prev.map(i => i.id === id ? { ...i, ...fields } : i))
+    pending.current[id] = { ...(pending.current[id] || {}), ...fields }
+    clearTimeout(timers.current[id])
+    timers.current[id] = setTimeout(() => {
+      const toSave = pending.current[id]
+      delete pending.current[id]
+      delete timers.current[id]
+      supabase.from(table).update(toRow(toSave)).eq('id', id).then(({ error }) => {
+        if (error) console.error(`Erro ao salvar em ${table}:`, error)
+      })
+    }, 500)
+  }
+}
+
 // ── Lista (tela /painel/landing-pages) ──
 export function useLandingPages() {
   const [pages, setPages] = useState([])
@@ -86,7 +107,7 @@ export function useLandingPages() {
   return { pages, loading, reload: load }
 }
 
-// ── Página única + itens de carrossel + depoimentos (tela do editor) ──
+// ── Página única + itens de carrossel + depoimentos + marcas (tela do editor) ──
 export function useLandingPage(slug) {
   const [page, setPage] = useState(null)
   const [items, setItems] = useState([])
@@ -138,6 +159,7 @@ export function useLandingPage(slug) {
 
   // ── carrossel ──
   const itemHelpers = usePositionedCollection('landing_page_carousel_items', setItems)
+  const debouncedItemUpdate = useDebouncedUpdate('landing_page_carousel_items', setItems)
 
   const addCarouselItem = async (mediaUrl, linkUrl) => {
     const position = items.length ? Math.max(...items.map(i => i.position)) + 1 : 0
@@ -149,21 +171,19 @@ export function useLandingPage(slug) {
     setItems(prev => [...prev, itemFromDB(data)])
   }
 
-  const updateCarouselItem = async (id, fields) => {
+  const updateCarouselItem = (id, fields) => debouncedItemUpdate(id, fields, f => {
     const row = {}
-    if (fields.mediaUrl !== undefined) row.media_url = fields.mediaUrl
-    if (fields.linkUrl !== undefined) row.link_url = fields.linkUrl || null
-    if (fields.position !== undefined) row.position = fields.position
-    const { error } = await supabase.from('landing_page_carousel_items').update(row).eq('id', id)
-    if (error) throw error
-    setItems(prev => prev.map(i => i.id === id ? { ...i, ...fields } : i))
-  }
+    if (f.mediaUrl !== undefined) row.media_url = f.mediaUrl
+    if (f.linkUrl !== undefined) row.link_url = f.linkUrl || null
+    return row
+  })
 
   const removeCarouselItem = itemHelpers.remove
   const reorderCarouselItem = (id, direction) => itemHelpers.reorder(items, id, direction)
 
   // ── depoimentos ──
   const testimonialHelpers = usePositionedCollection('landing_page_testimonials', setTestimonials)
+  const debouncedTestimonialUpdate = useDebouncedUpdate('landing_page_testimonials', setTestimonials)
 
   const addTestimonial = async ({ avatarUrl, name, handle, comment }) => {
     const position = testimonials.length ? Math.max(...testimonials.map(t => t.position)) + 1 : 0
@@ -175,23 +195,21 @@ export function useLandingPage(slug) {
     setTestimonials(prev => [...prev, testimonialFromDB(data)])
   }
 
-  const updateTestimonial = async (id, fields) => {
+  const updateTestimonial = (id, fields) => debouncedTestimonialUpdate(id, fields, f => {
     const row = {}
-    if (fields.avatarUrl !== undefined) row.avatar_url = fields.avatarUrl || null
-    if (fields.name !== undefined) row.name = fields.name
-    if (fields.handle !== undefined) row.handle = fields.handle
-    if (fields.comment !== undefined) row.comment = fields.comment
-    if (fields.position !== undefined) row.position = fields.position
-    const { error } = await supabase.from('landing_page_testimonials').update(row).eq('id', id)
-    if (error) throw error
-    setTestimonials(prev => prev.map(t => t.id === id ? { ...t, ...fields } : t))
-  }
+    if (f.avatarUrl !== undefined) row.avatar_url = f.avatarUrl || null
+    if (f.name !== undefined) row.name = f.name
+    if (f.handle !== undefined) row.handle = f.handle
+    if (f.comment !== undefined) row.comment = f.comment
+    return row
+  })
 
   const removeTestimonial = testimonialHelpers.remove
   const reorderTestimonial = (id, direction) => testimonialHelpers.reorder(testimonials, id, direction)
 
   // ── marcas parceiras ──
   const brandHelpers = usePositionedCollection('landing_page_brands', setBrands)
+  const debouncedBrandUpdate = useDebouncedUpdate('landing_page_brands', setBrands)
 
   const addBrand = async (logoUrl, name = '', linkUrl = '') => {
     const position = brands.length ? Math.max(...brands.map(b => b.position)) + 1 : 0
@@ -203,16 +221,13 @@ export function useLandingPage(slug) {
     setBrands(prev => [...prev, brandFromDB(data)])
   }
 
-  const updateBrand = async (id, fields) => {
+  const updateBrand = (id, fields) => debouncedBrandUpdate(id, fields, f => {
     const row = {}
-    if (fields.logoUrl !== undefined) row.logo_url = fields.logoUrl
-    if (fields.name !== undefined) row.name = fields.name
-    if (fields.linkUrl !== undefined) row.link_url = fields.linkUrl || null
-    if (fields.position !== undefined) row.position = fields.position
-    const { error } = await supabase.from('landing_page_brands').update(row).eq('id', id)
-    if (error) throw error
-    setBrands(prev => prev.map(b => b.id === id ? { ...b, ...fields } : b))
-  }
+    if (f.logoUrl !== undefined) row.logo_url = f.logoUrl
+    if (f.name !== undefined) row.name = f.name
+    if (f.linkUrl !== undefined) row.link_url = f.linkUrl || null
+    return row
+  })
 
   const removeBrand = brandHelpers.remove
   const reorderBrand = (id, direction) => brandHelpers.reorder(brands, id, direction)
