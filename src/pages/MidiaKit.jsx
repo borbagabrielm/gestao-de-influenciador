@@ -343,8 +343,9 @@ export default function MidiaKitPage() {
               <div className={`mk-carousel${loopsBrands ? '' : ' no-loop'}`}>
                 {brandItems.map((b, i) => (
                   <a key={b.id + '-' + i} className="mk-brand-item" href={b.linkUrl || undefined}
-                    target={b.linkUrl ? '_blank' : undefined} rel="noreferrer">
-                    <img src={b.logoUrl} alt={b.name || 'Marca parceira'} loading="lazy" />
+                    target={b.linkUrl ? '_blank' : undefined} rel="noreferrer" aria-label={b.name || 'Marca parceira'}>
+                    <div className="mk-brand-logo" role="img" aria-label={b.name || 'Marca parceira'}
+                      style={{ WebkitMaskImage: `url(${b.logoUrl})`, maskImage: `url(${b.logoUrl})` }} />
                   </a>
                 ))}
               </div>

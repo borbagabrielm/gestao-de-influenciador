@@ -254,7 +254,13 @@
   display: flex; align-items: center; justify-content: center;
   padding: 18px;
 }
-.midia-kit .mk-brand-item img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.midia-kit .mk-brand-logo {
+  width: 100%; height: 100%;
+  background-color: var(--mk-brand-tint, var(--mk-ink));
+  -webkit-mask-size: contain; mask-size: contain;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: center; mask-position: center;
+}
 
 /* ---------- depoimentos (comentários estilo Instagram) ---------- */
 .midia-kit .mk-testimonial-card {
