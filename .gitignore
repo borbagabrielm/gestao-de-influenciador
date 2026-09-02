@@ -4,3 +4,4 @@ dist
 .env
 .env.local
 src/images
+.DS_Store
