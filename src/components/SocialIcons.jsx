@@ -1,33 +1,33 @@
+export function InstagramIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" {...props}>
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+
+export function TikTokIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+      <path d="M16.6 5.82a4.28 4.28 0 0 1-3.14-1.4v9.9a4.9 4.9 0 1 1-4.9-4.9c.16 0 .32.01.48.03v2.5a2.4 2.4 0 1 0 1.9 2.35V2h2.53a4.28 4.28 0 0 0 4.13 4.1v2.5c-.35.02-.7.02-1-.03z" />
+    </svg>
+  )
+}
+
+export function YouTubeIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+      <path d="M21.6 7.6a2.9 2.9 0 0 0-2.05-2.06C17.8 5 12 5 12 5s-5.8 0-7.55.54A2.9 2.9 0 0 0 2.4 7.6 30.2 30.2 0 0 0 1.9 12a30.2 30.2 0 0 0 .5 4.4 2.9 2.9 0 0 0 2.05 2.06C6.2 19 12 19 12 19s5.8 0 7.55-.54a2.9 2.9 0 0 0 2.05-2.06 30.2 30.2 0 0 0 .5-4.4 30.2 30.2 0 0 0-.5-4.4ZM9.9 15.1V8.9l5.4 3.1-5.4 3.1Z" />
+    </svg>
+  )
+}
+
 export const SOCIALS = [
-  {
-    label: 'Instagram',
-    href: 'http://instagram.com/niconoal',
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <rect x="3" y="3" width="18" height="18" rx="5" />
-        <circle cx="12" cy="12" r="4" />
-        <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none" />
-      </svg>
-    ),
-  },
-  {
-    label: 'TikTok',
-    href: 'https://www.tiktok.com/@niconoal',
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M16.6 5.82a4.28 4.28 0 0 1-3.14-1.4v9.9a4.9 4.9 0 1 1-4.9-4.9c.16 0 .32.01.48.03v2.5a2.4 2.4 0 1 0 1.9 2.35V2h2.53a4.28 4.28 0 0 0 4.13 4.1v2.5c-.35.02-.7.02-1-.03z" />
-      </svg>
-    ),
-  },
-  {
-    label: 'YouTube',
-    href: 'https://www.youtube.com/nicolasmachadoblog?sub_confirmation=1',
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M21.6 7.6a2.9 2.9 0 0 0-2.05-2.06C17.8 5 12 5 12 5s-5.8 0-7.55.54A2.9 2.9 0 0 0 2.4 7.6 30.2 30.2 0 0 0 1.9 12a30.2 30.2 0 0 0 .5 4.4 2.9 2.9 0 0 0 2.05 2.06C6.2 19 12 19 12 19s5.8 0 7.55-.54a2.9 2.9 0 0 0 2.05-2.06 30.2 30.2 0 0 0 .5-4.4 30.2 30.2 0 0 0-.5-4.4ZM9.9 15.1V8.9l5.4 3.1-5.4 3.1Z" />
-      </svg>
-    ),
-  },
+  { label: 'Instagram', href: 'http://instagram.com/niconoal', icon: <InstagramIcon width={20} height={20} /> },
+  { label: 'TikTok', href: 'https://www.tiktok.com/@niconoal', icon: <TikTokIcon width={20} height={20} /> },
+  { label: 'YouTube', href: 'https://www.youtube.com/nicolasmachadoblog?sub_confirmation=1', icon: <YouTubeIcon width={20} height={20} /> },
 ]
 
 export function WhatsAppIcon(props) {

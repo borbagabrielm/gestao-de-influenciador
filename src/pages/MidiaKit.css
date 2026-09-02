@@ -12,6 +12,7 @@
   --mk-chrome-2:   #8A929A;
   --mk-chrome-3:   #4B5157;
   --mk-cobalt:     #2B3EA6;
+  --mk-cobalt-chart: #3A4EC0; /* mesma família do cobalt, um pouco mais claro — passa no validador de contraste pra uso em gráficos */
   --mk-vermilion:  #B93A28;
   --mk-mustard:    #BE8F26;
 
@@ -212,10 +213,19 @@
   display: flex; align-items: center; justify-content: center;
   background: var(--mk-platform-accent); color: var(--mk-paper);
 }
+.midia-kit .mk-platform-icon svg { width: 18px; height: 18px; }
+.midia-kit .mk-platform-followers { display: flex; flex-direction: column; gap: 1px; padding-right: 18px; border-right: 1px solid var(--mk-paper-line); }
+.midia-kit .mk-platform-followers-lbl { font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mk-ink-dim); }
+.midia-kit .mk-platform-followers-val {
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.3rem;
+  font-variant-numeric: tabular-nums; color: var(--mk-platform-accent);
+}
+.midia-kit .mk-platform-followers-val .sub { font-family: 'Space Mono', monospace; font-size: 0.68rem; font-weight: 400; }
+.midia-kit .mk-platform-titlewrap { min-width: 0; }
 .midia-kit .mk-platform-name { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.05rem; color: var(--mk-platform-accent); }
 .midia-kit .mk-platform-handle { font-size: 0.75rem; color: var(--mk-ink-dim); }
-.midia-kit .mk-platform-period { margin-left: auto; color: var(--mk-ink-dim); }
-.midia-kit .mk-platform-stats { display: grid; grid-template-columns: repeat(3, 1fr); }
+.midia-kit .mk-platform-period { margin-left: auto; color: var(--mk-ink-dim); flex-shrink: 0; }
+.midia-kit .mk-platform-stats { display: grid; grid-template-columns: repeat(5, 1fr); }
 .midia-kit .mk-pstat { padding: 22px; border-left: 1px solid var(--mk-paper-line); display: flex; flex-direction: column; gap: 6px; }
 .midia-kit .mk-pstat:first-child { border-left: none; }
 .midia-kit .mk-pstat .num { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(1.5rem, 3vw, 2.1rem); font-variant-numeric: tabular-nums; color: var(--mk-platform-accent); }
@@ -227,12 +237,18 @@
 @media (max-width: 640px) {
   .midia-kit .mk-platform-stats { grid-template-columns: repeat(2, 1fr); }
   .midia-kit .mk-pstat:nth-child(2n+1) { border-left: none; }
+  .midia-kit .mk-platform-head { flex-wrap: wrap; }
+  .midia-kit .mk-platform-period { margin-left: 0; width: 100%; }
 }
 
 /* ---------- audience insights ---------- */
 .midia-kit .mk-audience-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; align-items: start; }
-.midia-kit .mk-platform.aud { --mk-platform-accent: var(--mk-cobalt); margin-bottom: 0; }
-.midia-kit .bar.aud { background: var(--mk-cobalt); }
+.midia-kit .mk-platform.aud {
+  --mk-platform-accent: var(--mk-cobalt-chart);
+  background: color-mix(in srgb, var(--mk-cobalt-chart) 6%, var(--mk-paper));
+  margin-bottom: 0;
+}
+.midia-kit .bar.aud { background: var(--mk-cobalt-chart); }
 .midia-kit .mk-audience-body { padding: 22px; }
 .midia-kit .mk-audience-tag {
   display: inline-block;

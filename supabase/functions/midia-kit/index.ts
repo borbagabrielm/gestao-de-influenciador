@@ -39,6 +39,10 @@ function pctChange(curr: number, prev: number): number | null {
   return Number((((curr - prev) / prev) * 100).toFixed(1))
 }
 
+function totalInteractions(rows: any[]) {
+  return sum(rows, 'likes') + sum(rows, 'comentarios') + sum(rows, 'compartilhamentos')
+}
+
 // stats de uma janela de dias, sem "melhor formato" (usado só pro comparativo)
 function windowStats(rows: any[]) {
   return {
@@ -47,6 +51,7 @@ function windowStats(rows: any[]) {
     avgEngagementPct: avgEngagement(rows),
     totalReach: sum(rows, 'alcance'),
     totalViews: sum(rows, 'views'),
+    totalInteractions: totalInteractions(rows),
   }
 }
 
@@ -108,9 +113,12 @@ function platformStats(rows60: any[], platform: string) {
     avgEngagementPct: avgEngagement(rows),
     totalViews: sum(rows, 'views'),
     totalReach,
+    totalInteractions: current.totalInteractions,
     topFormat,
     postsAnalyzedGrowthPct30d: pctChange(current.postsAnalyzed, prior.postsAnalyzed),
     avgViewsGrowthPct30d: pctChange(current.avgViews, prior.avgViews),
+    totalViewsGrowthPct30d: pctChange(current.totalViews, prior.totalViews),
+    totalInteractionsGrowthPct30d: pctChange(current.totalInteractions, prior.totalInteractions),
     avgEngagementGrowthPct30d: pctChange(current.avgEngagementPct, prior.avgEngagementPct),
     totalReachGrowthPct30d: reachGrowth,
   }

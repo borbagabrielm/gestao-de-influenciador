@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import './MidiaKit.css'
 import { useLandingPage } from '@/hooks/useLandingPages'
-import { SOCIALS, WhatsAppIcon, MailIcon } from '@/components/SocialIcons'
+import { SOCIALS, WhatsAppIcon, MailIcon, InstagramIcon, TikTokIcon } from '@/components/SocialIcons'
+import { MapPin, Calendar, Users } from 'lucide-react'
 import { fmtN, PLAT_COLOR } from '@/pages/metricas/shared.js'
 import { isVideoUrl } from '@/lib/media'
 import HorizontalBarChart from '@/components/charts/HorizontalBarChart'
@@ -109,12 +110,20 @@ function StatTile({ value, label, growthPct, loading, showComparison }) {
 
 function PlatformBlock({ platform, label, handle, icon, stats, loading, error, showComparison }) {
   const cls = platform === 'instagram' ? 'ig' : 'tt'
+  const followersGrowth = showComparison ? growthLabel(stats?.growthPct30d) : null
   return (
     <div className={`mk-platform ${cls}`}>
       <div className="mk-platform-head">
         <div className={`bar ${cls}`} />
         <div className="mk-platform-icon">{icon}</div>
-        <div>
+        <div className="mk-platform-followers">
+          <div className="mk-platform-followers-lbl mk-mono">Seguidores</div>
+          <div className="mk-platform-followers-val">
+            {loading ? '—' : (stats?.followers != null ? fmtN(stats.followers) : '—')}
+            {followersGrowth && !loading && <span className={`sub ${followersGrowth.dir}`}> {followersGrowth.text}</span>}
+          </div>
+        </div>
+        <div className="mk-platform-titlewrap">
           <div className="mk-platform-name">{label}</div>
           <div className="mk-platform-handle mk-mono">{handle}</div>
         </div>
@@ -126,17 +135,16 @@ function PlatformBlock({ platform, label, handle, icon, stats, loading, error, s
         </div>
       ) : (
         <div className="mk-platform-stats">
-          <StatTile loading={loading} showComparison={showComparison} value={stats?.followers != null ? fmtN(stats.followers) : '—'} label="Seguidores"
-            growthPct={stats?.growthPct30d} />
-          <StatTile loading={loading} showComparison={showComparison} value={stats?.avgEngagementPct != null ? `${stats.avgEngagementPct}%` : '—'} label="Engajamento médio"
-            growthPct={stats?.avgEngagementGrowthPct30d} />
-          <StatTile loading={loading} showComparison={showComparison} value={stats?.avgViews != null ? fmtN(stats.avgViews) : '—'} label="Views médias"
-            growthPct={stats?.avgViewsGrowthPct30d} />
-          <StatTile loading={loading} showComparison={showComparison} value={stats?.postsAnalyzed ?? '—'} label="Posts analisados"
+          <StatTile loading={loading} showComparison={showComparison} value={stats?.postsAnalyzed ?? '—'} label="Publicações"
             growthPct={stats?.postsAnalyzedGrowthPct30d} />
-          <StatTile loading={loading} showComparison={showComparison} value={stats?.totalReach ? fmtN(stats.totalReach) : (stats?.totalViews ? fmtN(stats.totalViews) : '—')} label="Alcance total"
+          <StatTile loading={loading} showComparison={showComparison} value={stats?.totalReach != null ? fmtN(stats.totalReach) : '—'} label="Alcance"
             growthPct={stats?.totalReachGrowthPct30d} />
-          <StatTile loading={loading} value={stats?.topFormat?.label?.toUpperCase() || '—'} label="Melhor formato" />
+          <StatTile loading={loading} showComparison={showComparison} value={stats?.totalInteractions != null ? fmtN(stats.totalInteractions) : '—'} label="Interações"
+            growthPct={stats?.totalInteractionsGrowthPct30d} />
+          <StatTile loading={loading} showComparison={showComparison} value={stats?.totalViews != null ? fmtN(stats.totalViews) : '—'} label="Visualizações"
+            growthPct={stats?.totalViewsGrowthPct30d} />
+          <StatTile loading={loading} showComparison={showComparison} value={stats?.avgEngagementPct != null ? `${stats.avgEngagementPct}%` : '—'} label="Tx. Engajamento"
+            growthPct={stats?.avgEngagementGrowthPct30d} />
         </div>
       )}
     </div>
@@ -290,8 +298,8 @@ export default function MidiaKitPage() {
               <p className="mk-section-desc">Números reais, direto da base de dados da plataforma — atualizados automaticamente.</p>
             </div>
           </div>
-          <PlatformBlock platform="instagram" label="Instagram" handle="@niconoal" icon="📸" stats={stats?.instagram} loading={statsLoading} error={statsError} showComparison={c.metrics_comparison_enabled !== false} />
-          <PlatformBlock platform="tiktok" label="TikTok" handle="@niconoal" icon="🎵" stats={stats?.tiktok} loading={statsLoading} error={statsError} showComparison={c.metrics_comparison_enabled !== false} />
+          <PlatformBlock platform="instagram" label="Instagram" handle="@niconoal" icon={<InstagramIcon />} stats={stats?.instagram} loading={statsLoading} error={statsError} showComparison={c.metrics_comparison_enabled !== false} />
+          <PlatformBlock platform="tiktok" label="TikTok" handle="@niconoal" icon={<TikTokIcon />} stats={stats?.tiktok} loading={statsLoading} error={statsError} showComparison={c.metrics_comparison_enabled !== false} />
         </div>
       </div>
 
@@ -309,18 +317,18 @@ export default function MidiaKitPage() {
             </div>
           </div>
           <div className="mk-audience-grid">
-            <AudiencePanel icon="📍" title="Cidades" empty={!stats?.audience?.cities?.length}>
-              <HorizontalBarChart items={stats?.audience?.cities || []} barColor="#2a78d6" trackColor="var(--mk-paper-line)"
-                labelColor="var(--mk-ink-dim)" valueColor="var(--mk-ink)" />
+            <AudiencePanel icon={<MapPin size={16} />} title="Cidades" empty={!stats?.audience?.cities?.length}>
+              <HorizontalBarChart items={stats?.audience?.cities || []} barColor="var(--mk-cobalt-chart)" trackColor="var(--mk-paper-line)"
+                labelColor="var(--mk-ink-dim)" valueColor="var(--mk-cobalt-chart)" radius={0} fontFamily="'Space Mono', monospace" valueFontFamily="'Syne', sans-serif" />
             </AudiencePanel>
-            <AudiencePanel icon="🎂" title="Faixa etária" empty={!stats?.audience?.age?.length}>
-              <HorizontalBarChart items={stats?.audience?.age || []} barColor="#2a78d6" trackColor="var(--mk-paper-line)"
-                labelColor="var(--mk-ink-dim)" valueColor="var(--mk-ink)" />
+            <AudiencePanel icon={<Calendar size={16} />} title="Faixa etária" empty={!stats?.audience?.age?.length}>
+              <HorizontalBarChart items={stats?.audience?.age || []} barColor="var(--mk-cobalt-chart)" trackColor="var(--mk-paper-line)"
+                labelColor="var(--mk-ink-dim)" valueColor="var(--mk-cobalt-chart)" radius={0} fontFamily="'Space Mono', monospace" valueFontFamily="'Syne', sans-serif" />
             </AudiencePanel>
-            <AudiencePanel icon="🚻" title="Gênero" empty={!stats?.audience?.gender?.length}>
+            <AudiencePanel icon={<Users size={16} />} title="Gênero" empty={!stats?.audience?.gender?.length}>
               <PieChart
-                items={(stats?.audience?.gender || []).map((d, i) => ({ label: d.label, value: d.value, color: ['#2a78d6', '#e34948'][i % 2] }))}
-                labelColor="var(--mk-ink-dim)" valueColor="var(--mk-ink)" size={120} />
+                items={(stats?.audience?.gender || []).map((d, i) => ({ label: d.label, value: d.value, color: ['var(--mk-cobalt-chart)', 'var(--mk-vermilion)'][i % 2] }))}
+                labelColor="var(--mk-ink-dim)" valueColor="var(--mk-ink)" size={120} swatchShape="square" fontFamily="'Space Mono', monospace" valueFontFamily="'Syne', sans-serif" />
             </AudiencePanel>
           </div>
         </div>
