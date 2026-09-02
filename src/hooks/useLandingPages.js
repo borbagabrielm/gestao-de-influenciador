@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { uploadToLandingPagesBucket } from '@/lib/storage'
 
 const fromDB = r => ({
   id: r.id,
@@ -19,16 +20,6 @@ const itemFromDB = r => ({
   position: r.position,
 })
 
-const testimonialFromDB = r => ({
-  id: r.id,
-  landingPageId: r.landing_page_id,
-  avatarUrl: r.avatar_url || '',
-  name: r.name,
-  handle: r.handle,
-  comment: r.comment,
-  position: r.position,
-})
-
 const brandFromDB = r => ({
   id: r.id,
   landingPageId: r.landing_page_id,
@@ -38,7 +29,7 @@ const brandFromDB = r => ({
   position: r.position,
 })
 
-// ── helpers genéricos de reordenação (reusados por carrossel, depoimentos e marcas) ──
+// ── helpers genéricos de reordenação (reusados por carrossel e marcas) ──
 function usePositionedCollection(table, setState) {
   const reorder = async (items, id, direction) => {
     const sorted = [...items].sort((a, b) => a.position - b.position)
@@ -107,11 +98,11 @@ export function useLandingPages() {
   return { pages, loading, reload: load }
 }
 
-// ── Página única + itens de carrossel + depoimentos + marcas (tela do editor) ──
+// ── Página única + itens de carrossel + marcas (tela do editor) ──
+// Depoimentos não vivem mais aqui — são globais, ver useTestimonials().
 export function useLandingPage(slug) {
   const [page, setPage] = useState(null)
   const [items, setItems] = useState([])
-  const [testimonials, setTestimonials] = useState([])
   const [brands, setBrands] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -122,16 +113,13 @@ export function useLandingPage(slug) {
       .from('landing_pages').select('*').eq('slug', slug).single()
     if (!pageErr && pageRow) {
       setPage(fromDB(pageRow))
-      const [{ data: itemRows }, { data: testimonialRows }, { data: brandRows }] = await Promise.all([
+      const [{ data: itemRows }, { data: brandRows }] = await Promise.all([
         supabase.from('landing_page_carousel_items').select('*')
-          .eq('landing_page_id', pageRow.id).order('position', { ascending: true }),
-        supabase.from('landing_page_testimonials').select('*')
           .eq('landing_page_id', pageRow.id).order('position', { ascending: true }),
         supabase.from('landing_page_brands').select('*')
           .eq('landing_page_id', pageRow.id).order('position', { ascending: true }),
       ])
       setItems((itemRows || []).map(itemFromDB))
-      setTestimonials((testimonialRows || []).map(testimonialFromDB))
       setBrands((brandRows || []).map(brandFromDB))
     }
     setLoading(false)
@@ -148,14 +136,7 @@ export function useLandingPage(slug) {
     setPage(prev => ({ ...prev, content }))
   }
 
-  const uploadMedia = async (file) => {
-    const ext = file.name.split('.').pop()
-    const path = `${slug}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
-    const { error } = await supabase.storage.from('landing-pages').upload(path, file, { upsert: true })
-    if (error) throw error
-    const { data } = supabase.storage.from('landing-pages').getPublicUrl(path)
-    return data.publicUrl
-  }
+  const uploadMedia = (file) => uploadToLandingPagesBucket(file, slug)
 
   // ── carrossel ──
   const itemHelpers = usePositionedCollection('landing_page_carousel_items', setItems)
@@ -180,32 +161,6 @@ export function useLandingPage(slug) {
 
   const removeCarouselItem = itemHelpers.remove
   const reorderCarouselItem = (id, direction) => itemHelpers.reorder(items, id, direction)
-
-  // ── depoimentos ──
-  const testimonialHelpers = usePositionedCollection('landing_page_testimonials', setTestimonials)
-  const debouncedTestimonialUpdate = useDebouncedUpdate('landing_page_testimonials', setTestimonials)
-
-  const addTestimonial = async ({ avatarUrl, name, handle, comment }) => {
-    const position = testimonials.length ? Math.max(...testimonials.map(t => t.position)) + 1 : 0
-    const { data, error } = await supabase
-      .from('landing_page_testimonials')
-      .insert({ landing_page_id: page.id, avatar_url: avatarUrl || null, name, handle, comment, position })
-      .select().single()
-    if (error) throw error
-    setTestimonials(prev => [...prev, testimonialFromDB(data)])
-  }
-
-  const updateTestimonial = (id, fields) => debouncedTestimonialUpdate(id, fields, f => {
-    const row = {}
-    if (f.avatarUrl !== undefined) row.avatar_url = f.avatarUrl || null
-    if (f.name !== undefined) row.name = f.name
-    if (f.handle !== undefined) row.handle = f.handle
-    if (f.comment !== undefined) row.comment = f.comment
-    return row
-  })
-
-  const removeTestimonial = testimonialHelpers.remove
-  const reorderTestimonial = (id, direction) => testimonialHelpers.reorder(testimonials, id, direction)
 
   // ── marcas parceiras ──
   const brandHelpers = usePositionedCollection('landing_page_brands', setBrands)
@@ -233,10 +188,9 @@ export function useLandingPage(slug) {
   const reorderBrand = (id, direction) => brandHelpers.reorder(brands, id, direction)
 
   return {
-    page, items, testimonials, brands, loading, reload: load,
+    page, items, brands, loading, reload: load,
     saveContent, uploadMedia,
     addCarouselItem, updateCarouselItem, removeCarouselItem, reorderCarouselItem,
-    addTestimonial, updateTestimonial, removeTestimonial, reorderTestimonial,
     addBrand, updateBrand, removeBrand, reorderBrand,
   }
 }

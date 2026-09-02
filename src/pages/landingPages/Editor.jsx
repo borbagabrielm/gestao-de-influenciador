@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import { useLandingPage } from '@/hooks/useLandingPages'
 import { useToast } from '@/contexts/ToastContext'
 import { SkeletonCard } from '@/components/Skeleton'
@@ -93,10 +93,9 @@ export default function LandingPageEditor() {
   const { slug } = useParams()
   const toast = useToast()
   const {
-    page, items, testimonials, brands, loading,
+    page, items, brands, loading,
     saveContent, uploadMedia,
     addCarouselItem, updateCarouselItem, removeCarouselItem, reorderCarouselItem,
-    addTestimonial, updateTestimonial, removeTestimonial, reorderTestimonial,
     addBrand, updateBrand, removeBrand, reorderBrand,
   } = useLandingPage(slug)
 
@@ -104,13 +103,9 @@ export default function LandingPageEditor() {
   const [saving, setSaving] = useState(false)
   const [uploadingHero, setUploadingHero] = useState(false)
   const [uploadingItems, setUploadingItems] = useState(false)
-  const [newTestimonial, setNewTestimonial] = useState({ avatarUrl: '', name: '', handle: '', comment: '' })
-  const [uploadingAvatar, setUploadingAvatar] = useState(false)
-  const [addingTestimonial, setAddingTestimonial] = useState(false)
   const [uploadingBrands, setUploadingBrands] = useState(false)
   const heroFileRef = useRef(null)
   const itemsFileRef = useRef(null)
-  const avatarFileRef = useRef(null)
   const brandsFileRef = useRef(null)
 
   useEffect(() => { if (page) setForm(page.content) }, [page])
@@ -160,32 +155,6 @@ export default function LandingPageEditor() {
     e.target.value = ''
   }
 
-  const handleAvatarUpload = async (e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setUploadingAvatar(true)
-    try {
-      const url = await uploadMedia(file)
-      setNewTestimonial(prev => ({ ...prev, avatarUrl: url }))
-    } catch (err) { toast.error('Erro no upload: ' + err.message) }
-    setUploadingAvatar(false)
-    e.target.value = ''
-  }
-
-  const handleAddTestimonial = async () => {
-    if (!newTestimonial.name || !newTestimonial.handle || !newTestimonial.comment) {
-      toast.error('Preencha nome, @ e comentário')
-      return
-    }
-    setAddingTestimonial(true)
-    try {
-      await addTestimonial(newTestimonial)
-      setNewTestimonial({ avatarUrl: '', name: '', handle: '', comment: '' })
-      toast.success('✓ Depoimento adicionado')
-    } catch (err) { toast.error('Erro: ' + err.message) }
-    setAddingTestimonial(false)
-  }
-
   const handleBrandsUpload = async (e) => {
     const files = Array.from(e.target.files || [])
     if (!files.length) return
@@ -202,7 +171,6 @@ export default function LandingPageEditor() {
   }
 
   const sortedItems = [...items].sort((a, b) => a.position - b.position)
-  const sortedTestimonials = [...testimonials].sort((a, b) => a.position - b.position)
   const sortedBrands = [...brands].sort((a, b) => a.position - b.position)
 
   return (
@@ -284,54 +252,16 @@ export default function LandingPageEditor() {
         )}
       </div>
 
-      {/* Depoimentos */}
+      {/* Depoimentos — agora gerenciados globalmente, compartilhados entre landing pages */}
       <div className="card">
-        <div className="text-sm font-semibold mb-4" style={{ color: 'var(--text)' }}>Depoimentos ({sortedTestimonials.length})</div>
-
-        {sortedTestimonials.length > 0 && (
-          <div className="space-y-2.5 mb-4">
-            {sortedTestimonials.map((t, i) => (
-              <div key={t.id} className="flex items-start gap-3 p-2.5 rounded-lg" style={{ background: 'var(--bg3)' }}>
-                {t.avatarUrl
-                  ? <img src={t.avatarUrl} alt="" className="w-9 h-9 rounded-full object-cover flex-shrink-0 mt-0.5" />
-                  : <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5" style={{ background: 'var(--bg4)', color: 'var(--text2)' }}>{t.name.slice(0, 1).toUpperCase()}</div>}
-                <div className="flex-1 grid gap-1.5" style={{ gridTemplateColumns: '1fr 1fr' }}>
-                  <input className="form-input text-xs" placeholder="Nome" value={t.name} onChange={e => updateTestimonial(t.id, { name: e.target.value })} />
-                  <input className="form-input text-xs" placeholder="usuario (sem @)" value={t.handle} onChange={e => updateTestimonial(t.id, { handle: e.target.value })} />
-                  <textarea className="form-input text-xs" style={{ gridColumn: '1 / -1' }} rows={2} placeholder="Comentário"
-                    value={t.comment} onChange={e => updateTestimonial(t.id, { comment: e.target.value })} />
-                </div>
-                <ReorderButtons index={i} total={sortedTestimonials.length} confirmLabel="Remover este depoimento?"
-                  onUp={() => reorderTestimonial(t.id, 'up')}
-                  onDown={() => reorderTestimonial(t.id, 'down')}
-                  onRemove={() => removeTestimonial(t.id)} />
-              </div>
-            ))}
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Depoimentos</div>
+            <p className="text-xs mt-1" style={{ color: 'var(--text3)' }}>
+              Compartilhados entre todas as landing pages — editados num só lugar.
+            </p>
           </div>
-        )}
-
-        <div className="p-3 rounded-lg space-y-2.5" style={{ border: '1px dashed var(--border2)' }}>
-          <div className="text-xs font-medium" style={{ color: 'var(--text2)' }}>Novo depoimento</div>
-          <div className="flex items-center gap-3">
-            {newTestimonial.avatarUrl
-              ? <img src={newTestimonial.avatarUrl} alt="" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
-              : <div className="w-9 h-9 rounded-full flex-shrink-0" style={{ background: 'var(--bg4)' }} />}
-            <input ref={avatarFileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
-            <button className="btn-ghost" onClick={() => avatarFileRef.current?.click()} disabled={uploadingAvatar}>
-              {uploadingAvatar ? 'Enviando...' : 'Foto (opcional)'}
-            </button>
-          </div>
-          <div className="grid gap-2.5" style={{ gridTemplateColumns: '1fr 1fr' }}>
-            <input className="form-input text-xs" placeholder="Nome" value={newTestimonial.name}
-              onChange={e => setNewTestimonial(prev => ({ ...prev, name: e.target.value }))} />
-            <input className="form-input text-xs" placeholder="usuario (sem @)" value={newTestimonial.handle}
-              onChange={e => setNewTestimonial(prev => ({ ...prev, handle: e.target.value }))} />
-          </div>
-          <textarea className="form-input text-xs" rows={2} placeholder="Comentário" value={newTestimonial.comment}
-            onChange={e => setNewTestimonial(prev => ({ ...prev, comment: e.target.value }))} />
-          <button className="btn-ghost" onClick={handleAddTestimonial} disabled={addingTestimonial}>
-            {addingTestimonial ? 'Adicionando...' : '+ Adicionar depoimento'}
-          </button>
+          <Link to="/painel/landing-pages/depoimentos" className="btn-ghost">Gerenciar depoimentos →</Link>
         </div>
       </div>
 

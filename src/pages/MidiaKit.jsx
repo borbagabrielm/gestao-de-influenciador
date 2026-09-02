@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import './MidiaKit.css'
 import { useLandingPage } from '@/hooks/useLandingPages'
+import { useTestimonials } from '@/hooks/useTestimonials'
 import { SOCIALS, WhatsAppIcon, MailIcon, InstagramIcon, TikTokIcon } from '@/components/SocialIcons'
 import { MapPin, Calendar, Users } from 'lucide-react'
 import { fmtN, PLAT_COLOR } from '@/pages/metricas/shared.js'
@@ -171,7 +172,8 @@ function AudiencePanel({ icon, title, empty, children }) {
 }
 
 export default function MidiaKitPage() {
-  const { page, items, testimonials, brands, loading: pageLoading } = useLandingPage('midia-kit')
+  const { page, items, brands, loading: pageLoading } = useLandingPage('midia-kit')
+  const { testimonials } = useTestimonials()
   const { data: stats, status } = useMidiaKitStats()
   const statsLoading = status === 'loading'
   const statsError = status === 'error'
