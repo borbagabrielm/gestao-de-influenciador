@@ -8,7 +8,7 @@ import LandingPageEditor from './Editor'
 import LandingPagesTestimonials from './Testimonials'
 
 export default function LandingPagesPage() {
-  const { pages } = useLandingPages()
+  const { pages, createPage, duplicatePage } = useLandingPages()
   const isMobile = useIsMobile()
   const nav = useNavigate()
   const location = useLocation()
@@ -39,7 +39,7 @@ export default function LandingPagesPage() {
 
         <div className="flex-1 overflow-y-auto p-6">
           <Routes>
-            <Route index element={<LandingPagesList pages={pages} />} />
+            <Route index element={<LandingPagesList pages={pages} createPage={createPage} duplicatePage={duplicatePage} />} />
             <Route path="depoimentos" element={<LandingPagesTestimonials />} />
             <Route path=":slug" element={<LandingPageEditor />} />
           </Routes>

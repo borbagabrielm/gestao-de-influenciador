@@ -7,6 +7,7 @@ const fromDB = r => ({
   slug: r.slug,
   type: r.type,
   name: r.name,
+  description: r.description || '',
   published: r.published,
   content: r.content || {},
   updatedAt: r.updated_at,
@@ -29,7 +30,16 @@ const brandFromDB = r => ({
   position: r.position,
 })
 
-// ── helpers genéricos de reordenação (reusados por carrossel e marcas) ──
+const caseStudyFromDB = r => ({
+  id: r.id,
+  landingPageId: r.landing_page_id,
+  mediaUrl: r.media_url,
+  label: r.label || '',
+  linkUrl: r.link_url || '',
+  position: r.position,
+})
+
+// ── helpers genéricos de reordenação (reusados por carrossel, marcas e cases) ──
 function usePositionedCollection(table, setState) {
   const reorder = async (items, id, direction) => {
     const sorted = [...items].sort((a, b) => a.position - b.position)
@@ -78,6 +88,12 @@ function useDebouncedUpdate(table, setState) {
   }
 }
 
+const slugify = (str) => str
+  .toLowerCase()
+  .normalize('NFD').replace(/[̀-ͯ]/g, '')
+  .replace(/[^a-z0-9]+/g, '-')
+  .replace(/(^-|-$)/g, '')
+
 // ── Lista (tela /painel/landing-pages) ──
 export function useLandingPages() {
   const [pages, setPages] = useState([])
@@ -95,15 +111,69 @@ export function useLandingPages() {
 
   useEffect(() => { load() }, [load])
 
-  return { pages, loading, reload: load }
+  const createPage = async ({ slug, name, description }) => {
+    const cleanSlug = slugify(slug)
+    if (!cleanSlug) throw new Error('Slug inválido')
+    const { data, error } = await supabase
+      .from('landing_pages')
+      .insert({ slug: cleanSlug, type: 'campaign', name, description: description || '', content: {}, published: true })
+      .select().single()
+    if (error) throw error
+    const created = fromDB(data)
+    setPages(prev => [...prev, created])
+    return created
+  }
+
+  // Duplica uma página inteira: registro + conteúdo + carrossel + marcas + case studies.
+  // Depoimentos não são copiados — são globais, compartilhados por todas as páginas.
+  const duplicatePage = async (sourcePageId, { slug, name, description }) => {
+    const cleanSlug = slugify(slug)
+    if (!cleanSlug) throw new Error('Slug inválido')
+
+    const { data: sourcePage, error: srcErr } = await supabase
+      .from('landing_pages').select('*').eq('id', sourcePageId).single()
+    if (srcErr) throw srcErr
+
+    const { data: newPage, error: insErr } = await supabase
+      .from('landing_pages')
+      .insert({
+        slug: cleanSlug, type: sourcePage.type, name,
+        description: description || '', content: sourcePage.content || {}, published: true,
+      })
+      .select().single()
+    if (insErr) throw insErr
+
+    const cloneCollection = async (table, extraFields = r => ({})) => {
+      const { data: rows } = await supabase.from(table).select('*').eq('landing_page_id', sourcePageId)
+      if (!rows?.length) return
+      await supabase.from(table).insert(rows.map(r => ({
+        landing_page_id: newPage.id,
+        position: r.position,
+        ...extraFields(r),
+      })))
+    }
+
+    await Promise.all([
+      cloneCollection('landing_page_carousel_items', r => ({ media_url: r.media_url, link_url: r.link_url })),
+      cloneCollection('landing_page_brands', r => ({ logo_url: r.logo_url, name: r.name, link_url: r.link_url })),
+      cloneCollection('landing_page_case_studies', r => ({ media_url: r.media_url, label: r.label, link_url: r.link_url })),
+    ])
+
+    const created = fromDB(newPage)
+    setPages(prev => [...prev, created])
+    return created
+  }
+
+  return { pages, loading, reload: load, createPage, duplicatePage }
 }
 
-// ── Página única + itens de carrossel + marcas (tela do editor) ──
+// ── Página única + itens de carrossel + marcas + case studies (tela do editor) ──
 // Depoimentos não vivem mais aqui — são globais, ver useTestimonials().
 export function useLandingPage(slug) {
   const [page, setPage] = useState(null)
   const [items, setItems] = useState([])
   const [brands, setBrands] = useState([])
+  const [caseStudies, setCaseStudies] = useState([])
   const [loading, setLoading] = useState(true)
 
   const load = useCallback(async () => {
@@ -113,14 +183,17 @@ export function useLandingPage(slug) {
       .from('landing_pages').select('*').eq('slug', slug).single()
     if (!pageErr && pageRow) {
       setPage(fromDB(pageRow))
-      const [{ data: itemRows }, { data: brandRows }] = await Promise.all([
+      const [{ data: itemRows }, { data: brandRows }, { data: caseRows }] = await Promise.all([
         supabase.from('landing_page_carousel_items').select('*')
           .eq('landing_page_id', pageRow.id).order('position', { ascending: true }),
         supabase.from('landing_page_brands').select('*')
           .eq('landing_page_id', pageRow.id).order('position', { ascending: true }),
+        supabase.from('landing_page_case_studies').select('*')
+          .eq('landing_page_id', pageRow.id).order('position', { ascending: true }),
       ])
       setItems((itemRows || []).map(itemFromDB))
       setBrands((brandRows || []).map(brandFromDB))
+      setCaseStudies((caseRows || []).map(caseStudyFromDB))
     }
     setLoading(false)
   }, [slug])
@@ -187,10 +260,36 @@ export function useLandingPage(slug) {
   const removeBrand = brandHelpers.remove
   const reorderBrand = (id, direction) => brandHelpers.reorder(brands, id, direction)
 
+  // ── publicidades relacionadas (case studies) ──
+  const caseHelpers = usePositionedCollection('landing_page_case_studies', setCaseStudies)
+  const debouncedCaseUpdate = useDebouncedUpdate('landing_page_case_studies', setCaseStudies)
+
+  const addCaseStudy = async (mediaUrl, label = '', linkUrl = '') => {
+    const position = caseStudies.length ? Math.max(...caseStudies.map(c => c.position)) + 1 : 0
+    const { data, error } = await supabase
+      .from('landing_page_case_studies')
+      .insert({ landing_page_id: page.id, media_url: mediaUrl, label, link_url: linkUrl || null, position })
+      .select().single()
+    if (error) throw error
+    setCaseStudies(prev => [...prev, caseStudyFromDB(data)])
+  }
+
+  const updateCaseStudy = (id, fields) => debouncedCaseUpdate(id, fields, f => {
+    const row = {}
+    if (f.mediaUrl !== undefined) row.media_url = f.mediaUrl
+    if (f.label !== undefined) row.label = f.label
+    if (f.linkUrl !== undefined) row.link_url = f.linkUrl || null
+    return row
+  })
+
+  const removeCaseStudy = caseHelpers.remove
+  const reorderCaseStudy = (id, direction) => caseHelpers.reorder(caseStudies, id, direction)
+
   return {
-    page, items, brands, loading, reload: load,
+    page, items, brands, caseStudies, loading, reload: load,
     saveContent, uploadMedia,
     addCarouselItem, updateCarouselItem, removeCarouselItem, reorderCarouselItem,
     addBrand, updateBrand, removeBrand, reorderBrand,
+    addCaseStudy, updateCaseStudy, removeCaseStudy, reorderCaseStudy,
   }
 }

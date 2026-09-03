@@ -1,0 +1,78 @@
+/* Peças extras do template de campanha — reaproveita os tokens e classes
+   .mk-* definidos em MidiaKit.css (importado junto). Nada aqui sobrescreve
+   ou duplica aquele arquivo, só soma o que é específico de campanha. */
+
+.midia-kit.campaign-page .cp-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border: 1px solid var(--mk-chrome-2);
+  border-radius: 999px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mk-cream);
+  margin-bottom: 24px;
+}
+
+.midia-kit.campaign-page .cp-hero-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: clamp(2.2rem, 5.6vw, 4rem);
+  line-height: 1.04;
+  color: var(--mk-cream);
+  text-wrap: balance;
+}
+
+.midia-kit.campaign-page .cp-cases-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.midia-kit.campaign-page .cp-case-card {
+  position: relative;
+  display: block;
+  text-decoration: none;
+  border: 1px solid var(--mk-paper-line);
+  background: rgba(21, 19, 15, 0.02);
+}
+
+.midia-kit.campaign-page .cp-case-media {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+}
+
+.midia-kit.campaign-page .cp-case-media img,
+.midia-kit.campaign-page .cp-case-media video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.midia-kit.campaign-page .cp-case-card:hover .cp-case-media img,
+.midia-kit.campaign-page .cp-case-card:hover .cp-case-media video {
+  transform: scale(1.04);
+}
+
+.midia-kit.campaign-page .cp-case-label {
+  padding: 12px 14px;
+  font-size: 0.78rem;
+  color: var(--mk-ink-dim);
+  border-top: 1px solid var(--mk-paper-line);
+}
+
+.midia-kit.campaign-page .cp-notfound {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  text-align: center;
+  padding: 40px 20px;
+}

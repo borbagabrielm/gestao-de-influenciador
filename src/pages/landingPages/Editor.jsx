@@ -5,36 +5,90 @@ import { useToast } from '@/contexts/ToastContext'
 import { SkeletonCard } from '@/components/Skeleton'
 import { isVideoUrl } from '@/lib/media'
 
-const SECTIONS = [
-  {
-    label: 'Hero',
-    fields: [
-      ['hero_eyebrow', 'Categoria (acima do título)'],
-      ['hero_line1', 'Título — linha 1'],
-      ['hero_line2', 'Título — linha 2'],
-      ['hero_line3', 'Título — linha 3'],
-      ['hero_caption', 'Legenda', 'textarea'],
-    ],
-  },
-  {
-    label: 'Sobre',
-    fields: [
-      ['sobre_eyebrow', 'Categoria'],
-      ['sobre_title', 'Título'],
-      ['sobre_paragraph_1', 'Parágrafo 1', 'textarea'],
-      ['sobre_paragraph_2', 'Parágrafo 2', 'textarea'],
-    ],
-  },
-  {
-    label: 'Contato',
-    fields: [
-      ['contact_title', 'Título da chamada final'],
-      ['contact_subtitle', 'Subtítulo'],
-      ['whatsapp_url', 'Link do WhatsApp'],
-      ['email', 'E-mail'],
-    ],
-  },
-]
+const SECTIONS_BY_TYPE = {
+  'midia-kit': [
+    {
+      label: 'Hero',
+      fields: [
+        ['hero_eyebrow', 'Categoria (acima do título)'],
+        ['hero_line1', 'Título — linha 1'],
+        ['hero_line2', 'Título — linha 2'],
+        ['hero_line3', 'Título — linha 3'],
+        ['hero_caption', 'Legenda', 'textarea'],
+      ],
+    },
+    {
+      label: 'Sobre',
+      fields: [
+        ['sobre_eyebrow', 'Categoria'],
+        ['sobre_title', 'Título'],
+        ['sobre_paragraph_1', 'Parágrafo 1', 'textarea'],
+        ['sobre_paragraph_2', 'Parágrafo 2', 'textarea'],
+      ],
+    },
+    {
+      label: 'Contato',
+      fields: [
+        ['contact_title', 'Título da chamada final'],
+        ['contact_subtitle', 'Subtítulo'],
+        ['whatsapp_url', 'Link do WhatsApp'],
+        ['email', 'E-mail'],
+      ],
+    },
+  ],
+  campaign: [
+    {
+      label: 'Hero',
+      fields: [
+        ['hero_badge', 'Selo (acima do título)'],
+        ['hero_title', 'Título'],
+        ['hero_subtitle', 'Subtítulo', 'textarea'],
+      ],
+    },
+    {
+      label: '01 · Quem é o Nico',
+      fields: [
+        ['about_eyebrow', 'Categoria'],
+        ['about_title', 'Título'],
+        ['about_paragraph_1', 'Parágrafo 1', 'textarea'],
+        ['about_paragraph_2', 'Parágrafo 2', 'textarea'],
+      ],
+    },
+    {
+      label: '02 · Publicidades relacionadas',
+      fields: [
+        ['cases_eyebrow', 'Categoria'],
+        ['cases_title', 'Título'],
+        ['cases_desc', 'Descrição', 'textarea'],
+      ],
+    },
+    {
+      label: '03 · Conteúdo & conexão com a marca',
+      fields: [
+        ['content_eyebrow', 'Categoria'],
+        ['content_title', 'Título'],
+        ['content_desc', 'Descrição', 'textarea'],
+      ],
+    },
+    {
+      label: '06 · Parceiros',
+      fields: [
+        ['partners_eyebrow', 'Categoria'],
+        ['partners_title', 'Título'],
+        ['partners_desc', 'Descrição', 'textarea'],
+      ],
+    },
+    {
+      label: '07 · Contato',
+      fields: [
+        ['contact_title', 'Título da chamada final'],
+        ['contact_subtitle', 'Subtítulo'],
+        ['whatsapp_url', 'Link do WhatsApp'],
+        ['email', 'E-mail'],
+      ],
+    },
+  ],
+}
 
 function Field({ label, value, onChange, type }) {
   return (
@@ -93,10 +147,11 @@ export default function LandingPageEditor() {
   const { slug } = useParams()
   const toast = useToast()
   const {
-    page, items, brands, loading,
+    page, items, brands, caseStudies, loading,
     saveContent, uploadMedia,
     addCarouselItem, updateCarouselItem, removeCarouselItem, reorderCarouselItem,
     addBrand, updateBrand, removeBrand, reorderBrand,
+    addCaseStudy, updateCaseStudy, removeCaseStudy, reorderCaseStudy,
   } = useLandingPage(slug)
 
   const [form, setForm] = useState(null)
@@ -104,9 +159,11 @@ export default function LandingPageEditor() {
   const [uploadingHero, setUploadingHero] = useState(false)
   const [uploadingItems, setUploadingItems] = useState(false)
   const [uploadingBrands, setUploadingBrands] = useState(false)
+  const [uploadingCases, setUploadingCases] = useState(false)
   const heroFileRef = useRef(null)
   const itemsFileRef = useRef(null)
   const brandsFileRef = useRef(null)
+  const casesFileRef = useRef(null)
 
   useEffect(() => { if (page) setForm(page.content) }, [page])
 
@@ -170,8 +227,26 @@ export default function LandingPageEditor() {
     e.target.value = ''
   }
 
+  const handleCasesUpload = async (e) => {
+    const files = Array.from(e.target.files || [])
+    if (!files.length) return
+    setUploadingCases(true)
+    try {
+      for (const file of files) {
+        const url = await uploadMedia(file)
+        await addCaseStudy(url, '', '')
+      }
+      toast.success(`✓ ${files.length} publicidade(s) adicionada(s)`)
+    } catch (err) { toast.error('Erro no upload: ' + err.message) }
+    setUploadingCases(false)
+    e.target.value = ''
+  }
+
   const sortedItems = [...items].sort((a, b) => a.position - b.position)
   const sortedBrands = [...brands].sort((a, b) => a.position - b.position)
+  const sortedCases = [...caseStudies].sort((a, b) => a.position - b.position)
+  const sections = SECTIONS_BY_TYPE[page?.type] || SECTIONS_BY_TYPE['midia-kit']
+  const isCampaign = page?.type === 'campaign'
 
   return (
     <div className="max-w-3xl space-y-6">
@@ -201,7 +276,7 @@ export default function LandingPageEditor() {
         </div>
       </div>
 
-      {SECTIONS.map(section => (
+      {sections.map(section => (
         <div key={section.label} className="card space-y-4">
           <div className="text-sm font-semibold" style={{ color: 'var(--text)' }}>{section.label}</div>
           {section.fields.map(([key, label, type]) => (
@@ -220,6 +295,41 @@ export default function LandingPageEditor() {
           desc="Exibe a variação (↑/↓ %) de cada métrica em relação aos 30 dias anteriores. Desative se preferir mostrar só os números atuais."
         />
       </div>
+
+      {/* Publicidades relacionadas já feitas — só existe em páginas de campanha */}
+      {isCampaign && (
+        <div className="card">
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Publicidades relacionadas ({sortedCases.length})</div>
+            <input ref={casesFileRef} type="file" accept="image/*,video/mp4,video/webm" multiple className="hidden" onChange={handleCasesUpload} />
+            <button className="btn-ghost" onClick={() => casesFileRef.current?.click()} disabled={uploadingCases}>
+              {uploadingCases ? 'Enviando...' : '+ Adicionar publicidade(s)'}
+            </button>
+          </div>
+
+          {sortedCases.length === 0 ? (
+            <p className="text-xs" style={{ color: 'var(--text3)' }}>Nenhuma publicidade adicionada ainda.</p>
+          ) : (
+            <div className="space-y-2.5">
+              {sortedCases.map((cs, i) => (
+                <div key={cs.id} className="flex items-center gap-3 p-2.5 rounded-lg" style={{ background: 'var(--bg3)' }}>
+                  {isVideoUrl(cs.mediaUrl)
+                    ? <video src={cs.mediaUrl} className="w-10 h-14 rounded object-cover flex-shrink-0" muted loop autoPlay playsInline />
+                    : <img src={cs.mediaUrl} alt="" className="w-10 h-14 rounded object-cover flex-shrink-0" />}
+                  <input className="form-input text-xs" style={{ width: 140 }} placeholder="Legenda (opcional)"
+                    value={cs.label} onChange={e => updateCaseStudy(cs.id, { label: e.target.value })} />
+                  <input className="form-input flex-1 text-xs" placeholder="Link do post (opcional)"
+                    value={cs.linkUrl} onChange={e => updateCaseStudy(cs.id, { linkUrl: e.target.value })} />
+                  <ReorderButtons index={i} total={sortedCases.length} confirmLabel="Remover esta publicidade?"
+                    onUp={() => reorderCaseStudy(cs.id, 'up')}
+                    onDown={() => reorderCaseStudy(cs.id, 'down')}
+                    onRemove={() => removeCaseStudy(cs.id)} />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Carrossel de conteúdos */}
       <div className="card">

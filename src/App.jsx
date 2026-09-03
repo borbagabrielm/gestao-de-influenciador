@@ -4,6 +4,7 @@ import { ThemeProvider } from '@/contexts/ThemeContext'
 import { ToastProvider } from '@/contexts/ToastContext'
 import LandingPage    from '@/pages/Landing'
 import MidiaKitPage   from '@/pages/MidiaKit'
+import CampaignLandingPage from '@/pages/landingPages/CampaignLandingPage'
 import LoginPage     from '@/pages/Login'
 import HomePage      from '@/pages/Home'
 import ParceriasPage from '@/pages/parcerias'
@@ -46,6 +47,7 @@ export default function App() {
               <Route path="/painel/metricas/*"   element={<PrivateRoute><MetricasPage /></PrivateRoute>} />
               <Route path="/painel/landing-pages/*" element={<PrivateRoute><LandingPagesPage /></PrivateRoute>} />
 
+              <Route path="/:slug" element={<CampaignLandingPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </BrowserRouter>
