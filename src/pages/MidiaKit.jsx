@@ -43,11 +43,10 @@ function useLazyCarouselVideos(deps) {
 }
 
 const DEFAULT_CONTENT = {
-  hero_eyebrow: 'criadora de conteúdo · moda & estilo',
-  hero_line1: 'COMUNICO.',
-  hero_line2: 'CRIO.',
-  hero_line3: 'INFLUENCIO.',
-  hero_caption: 'sobre duas coisas que eu amo muito: moda e criatividade — porto alegre, rs',
+  hero_line1: 'POR DENTRO DO',
+  hero_line2: 'universo icônico',
+  hero_line3: 'de @niconoal',
+  hero_caption: 'criando e compartilhando as coisas mais legais da internet',
   hero_photo_url: 'https://rciywgiuktjipcjtmrzw.supabase.co/storage/v1/object/public/avatars/nico.jpg',
   sobre_eyebrow: 'Quem é o ele',
   sobre_title: 'Autenticidade e ousadia em pessoa',
@@ -109,11 +108,11 @@ function StatTile({ value, label, growthPct, loading, showComparison }) {
   )
 }
 
-function PlatformBlock({ platform, label, handle, icon, stats, loading, error, showComparison }) {
+function PlatformBlock({ id, platform, label, handle, icon, stats, loading, error, showComparison }) {
   const cls = platform === 'instagram' ? 'ig' : 'tt'
   const followersGrowth = showComparison ? growthLabel(stats?.growthPct30d) : null
   return (
-    <div className={`mk-platform ${cls}`}>
+    <div id={id} className={`mk-platform ${cls}`} style={{ scrollMarginTop: 24 }}>
       <div className="mk-platform-head">
         <div className={`bar ${cls}`} />
         <div className="mk-platform-icon">{icon}</div>
@@ -179,6 +178,13 @@ export default function MidiaKitPage() {
   const statsError = status === 'error'
   useReveal()
 
+  // Rolagem suave só enquanto essa página está montada — não mexe no resto do app.
+  useEffect(() => {
+    const prev = document.documentElement.style.scrollBehavior
+    document.documentElement.style.scrollBehavior = 'smooth'
+    return () => { document.documentElement.style.scrollBehavior = prev }
+  }, [])
+
   const c = page?.content && Object.keys(page.content).length ? page.content : DEFAULT_CONTENT
   const loopsCarousel = items.length >= MIN_FOR_LOOP
   const carouselItems = loopsCarousel ? [...items, ...items] : items
@@ -194,7 +200,6 @@ export default function MidiaKitPage() {
       <div className="mk-masthead">
         <Link to="/" className="mk-wordmark">NICO&nbsp;NOAL</Link>
         <div className="mk-masthead-right">
-          <div className="mk-swatches"><span className="mk-swatch blue" /><span className="mk-swatch red" /><span className="mk-swatch mustard" /></div>
           <div className="mk-masthead-meta">
             <div className="l1 mk-mono">MÍDIA&nbsp;KIT</div>
             <div className="l2 mk-mono">ED.&nbsp;2026&nbsp;·&nbsp;POA/RS</div>
@@ -203,13 +208,13 @@ export default function MidiaKitPage() {
       </div>
       <div className="mk-rule" />
       <div className="mk-index-strip mk-mono">
-        <span><b>01</b> SOBRE</span>
-        <span><b>02</b> INSTAGRAM</span>
-        <span><b>03</b> TIKTOK</span>
-        <span><b>04</b> AUDIÊNCIA</span>
-        <span><b>05</b> PROVA&nbsp;SOCIAL</span>
-        <span><b>06</b> PARCEIROS</span>
-        <span><b>07</b> CONTATO</span>
+        <a href="#secao-sobre"><b>01</b> SOBRE</a>
+        <a href="#secao-instagram"><b>02</b> INSTAGRAM</a>
+        <a href="#secao-tiktok"><b>03</b> TIKTOK</a>
+        <a href="#secao-audiencia"><b>04</b> AUDIÊNCIA</a>
+        <a href="#secao-prova-social"><b>05</b> PROVA&nbsp;SOCIAL</a>
+        <a href="#secao-parceiros"><b>06</b> PARCEIROS</a>
+        <a href="#secao-contato"><b>07</b> CONTATO</a>
       </div>
       <div className="mk-rule" />
 
@@ -218,7 +223,6 @@ export default function MidiaKitPage() {
         <div className="mk-shell">
           <div className="mk-hero-grid">
             <div className="mk-hero-copy">
-              <span className="mk-eyebrow mk-hero-tag">{c.hero_eyebrow}</span>
               <div className="mk-hero-stack">
                 <h1 className="w">{c.hero_line1}</h1>
                 <h1 className="w blur-echo">{c.hero_line2}</h1>
@@ -227,20 +231,13 @@ export default function MidiaKitPage() {
               <p className="mk-hero-caption mk-mono">{c.hero_caption}</p>
               <div className="mk-annot mk-mono">(role para ver os números) ↓</div>
             </div>
-            <div className="mk-hero-photo-wrap">
+            <div className="mk-hero-cutout-wrap">
               <div className="mk-hero-orb-accent" aria-hidden="true" />
               {c.hero_photo_url ? (
-                <div className="mk-photo-slot dark has-image">
-                  <img src={c.hero_photo_url} alt="Retrato do Nico" />
-                  <span className="mk-cm tl" /><span className="mk-cm tr" /><span className="mk-cm bl" /><span className="mk-cm br" />
-                </div>
+                <img className="mk-hero-cutout-img" src={c.hero_photo_url} alt="Nico" />
               ) : (
-                <div className="mk-photo-slot dark">
-                  <span className="mk-cm tl" /><span className="mk-cm tr" /><span className="mk-cm bl" /><span className="mk-cm br" />
-                  <span className="ps-label mk-mono">FOTO — NICO</span>
-                </div>
+                <div className="mk-hero-cutout-placeholder mk-mono">RECORTE — NICO</div>
               )}
-              <div className="mk-photo-caption mk-mono">FOTO — NICO</div>
             </div>
           </div>
         </div>
@@ -248,7 +245,7 @@ export default function MidiaKitPage() {
       </div>
 
       {/* 01 SOBRE */}
-      <div className="mk-section on-paper mk-reveal">
+      <div id="secao-sobre" className="mk-section on-paper mk-reveal" style={{ scrollMarginTop: 24 }}>
         <div className="mk-shell">
           <div className="mk-section-head">
             <div className="mk-section-num">01</div>
@@ -300,15 +297,15 @@ export default function MidiaKitPage() {
               <p className="mk-section-desc">Números reais, direto da base de dados da plataforma — atualizados automaticamente.</p>
             </div>
           </div>
-          <PlatformBlock platform="instagram" label="Instagram" handle="@niconoal" icon={<InstagramIcon />} stats={stats?.instagram} loading={statsLoading} error={statsError} showComparison={c.metrics_comparison_enabled !== false} />
-          <PlatformBlock platform="tiktok" label="TikTok" handle="@niconoal" icon={<TikTokIcon />} stats={stats?.tiktok} loading={statsLoading} error={statsError} showComparison={c.metrics_comparison_enabled !== false} />
+          <PlatformBlock id="secao-instagram" platform="instagram" label="Instagram" handle="@niconoal" icon={<InstagramIcon />} stats={stats?.instagram} loading={statsLoading} error={statsError} showComparison={c.metrics_comparison_enabled !== false} />
+          <PlatformBlock id="secao-tiktok" platform="tiktok" label="TikTok" handle="@niconoal" icon={<TikTokIcon />} stats={stats?.tiktok} loading={statsLoading} error={statsError} showComparison={c.metrics_comparison_enabled !== false} />
         </div>
       </div>
 
       <div className="mk-rule" />
 
       {/* 04 AUDIENCIA */}
-      <div className="mk-section on-paper mk-reveal">
+      <div id="secao-audiencia" className="mk-section on-paper mk-reveal" style={{ scrollMarginTop: 24 }}>
         <div className="mk-shell">
           <div className="mk-section-head">
             <div className="mk-section-num">04</div>
@@ -339,7 +336,7 @@ export default function MidiaKitPage() {
       <div className="mk-rule" />
 
       {/* 05 PROVA SOCIAL */}
-      <div className="mk-section on-paper-2 mk-reveal">
+      <div id="secao-prova-social" className="mk-section on-paper-2 mk-reveal" style={{ scrollMarginTop: 24 }}>
         <div className="mk-shell">
           <div className="mk-section-head">
             <div className="mk-section-num">05</div>
@@ -386,7 +383,7 @@ export default function MidiaKitPage() {
       <div className="mk-rule" />
 
       {/* 06 PARCEIROS */}
-      <div className="mk-section on-paper mk-reveal">
+      <div id="secao-parceiros" className="mk-section on-paper mk-reveal" style={{ scrollMarginTop: 24 }}>
         <div className="mk-shell">
           <div className="mk-section-head">
             <div className="mk-section-num">06</div>
@@ -417,7 +414,7 @@ export default function MidiaKitPage() {
       </div>
 
       {/* 07 CONTATO */}
-      <div className="mk-section mk-contact mk-reveal">
+      <div id="secao-contato" className="mk-section mk-contact mk-reveal" style={{ scrollMarginTop: 24 }}>
         <div className="mk-shell">
           <span className="mk-eyebrow" style={{ color: 'var(--mk-chrome-1)' }}>07 · Contato</span>
           <h2 className="mk-contact-stack" style={{ marginTop: 14 }}>{c.contact_title}</h2>

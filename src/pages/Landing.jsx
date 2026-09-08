@@ -25,11 +25,8 @@ export default function LandingPage() {
           @niconoal
         </h1>
 
-        <p className="max-w-md text-base md:text-lg leading-relaxed mb-2" style={{ color: 'var(--text2)' }}>
-          compartilhando e criando <span style={{ color: 'var(--accent)', fontWeight: 700 }}>coisas icônicas</span>
-        </p>
-        <p className="text-sm mb-9" style={{ color: 'var(--text3)' }}>
-          📍 Porto Alegre, RS
+        <p className="max-w-md text-base md:text-lg leading-relaxed mb-9" style={{ color: 'var(--text2)' }}>
+          compartilhando e criando <strong style={{ color: 'var(--accent)', fontWeight: 700 }}>coisas icônicas</strong>
         </p>
 
         {/* CTAs */}

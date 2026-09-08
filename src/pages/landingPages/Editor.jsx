@@ -10,7 +10,6 @@ const SECTIONS_BY_TYPE = {
     {
       label: 'Hero',
       fields: [
-        ['hero_eyebrow', 'Categoria (acima do título)'],
         ['hero_line1', 'Título — linha 1'],
         ['hero_line2', 'Título — linha 2'],
         ['hero_line3', 'Título — linha 3'],
