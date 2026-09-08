@@ -188,7 +188,12 @@ export default function MidiaKitPage() {
     return () => { document.documentElement.style.scrollBehavior = prev }
   }, [])
 
-  const c = page?.content && Object.keys(page.content).length ? page.content : DEFAULT_CONTENT
+  // Enquanto ainda está buscando o conteúdo real, não usa o DEFAULT_CONTENT
+  // como se fosse o valor final — isso é o que causava o texto/foto antigos
+  // aparecerem por um instante antes de trocar pro conteúdo salvo no banco.
+  const c = page?.content && Object.keys(page.content).length
+    ? page.content
+    : (pageLoading ? {} : DEFAULT_CONTENT)
   const contentCategories = ['Principais', ...new Set(contents.map(ct => ct.category).filter(cat => cat && cat !== 'Principais'))]
   const filteredContents = activeCategory === 'Principais' ? contents : contents.filter(ct => ct.category === activeCategory)
   const loopsCarousel = filteredContents.length >= MIN_FOR_LOOP
