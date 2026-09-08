@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import './MidiaKit.css'
 import { useLandingPage } from '@/hooks/useLandingPages'
 import { useTestimonials } from '@/hooks/useTestimonials'
+import { useContents } from '@/hooks/useContents'
 import { SOCIALS, WhatsAppIcon, MailIcon, InstagramIcon, TikTokIcon } from '@/components/SocialIcons'
 import { MapPin, Calendar, Users } from 'lucide-react'
 import { fmtN, PLAT_COLOR } from '@/pages/metricas/shared.js'
@@ -171,8 +172,10 @@ function AudiencePanel({ icon, title, empty, children }) {
 }
 
 export default function MidiaKitPage() {
-  const { page, items, brands, loading: pageLoading } = useLandingPage('midia-kit')
+  const { page, brands, loading: pageLoading } = useLandingPage('midia-kit')
   const { testimonials } = useTestimonials()
+  const { contents, loading: contentsLoading } = useContents()
+  const [activeCategory, setActiveCategory] = useState('Principais')
   const { data: stats, status } = useMidiaKitStats()
   const statsLoading = status === 'loading'
   const statsError = status === 'error'
@@ -186,14 +189,16 @@ export default function MidiaKitPage() {
   }, [])
 
   const c = page?.content && Object.keys(page.content).length ? page.content : DEFAULT_CONTENT
-  const loopsCarousel = items.length >= MIN_FOR_LOOP
-  const carouselItems = loopsCarousel ? [...items, ...items] : items
+  const contentCategories = ['Principais', ...new Set(contents.map(ct => ct.category).filter(cat => cat && cat !== 'Principais'))]
+  const filteredContents = activeCategory === 'Principais' ? contents : contents.filter(ct => ct.category === activeCategory)
+  const loopsCarousel = filteredContents.length >= MIN_FOR_LOOP
+  const carouselItems = loopsCarousel ? [...filteredContents, ...filteredContents] : filteredContents
   const loopsTestimonials = testimonials.length >= MIN_FOR_LOOP
   const testimonialItems = loopsTestimonials ? [...testimonials, ...testimonials] : testimonials
   const loopsBrands = brands.length >= MIN_FOR_LOOP
   const brandItems = loopsBrands ? [...brands, ...brands] : brands
 
-  useLazyCarouselVideos([carouselItems.length])
+  useLazyCarouselVideos([carouselItems.length, activeCategory])
 
   return (
     <div className="midia-kit">
@@ -259,9 +264,19 @@ export default function MidiaKitPage() {
             <p>{c.sobre_paragraph_2}</p>
           </div>
 
-          {items.length > 0 ? (
-            <div className="mk-carousel-wrap">
-              <span className="mk-eyebrow mk-carousel-label">Alguns conteúdos</span>
+          <div className="mk-carousel-wrap">
+            <span className="mk-eyebrow mk-carousel-label">se joga aqui!</span>
+            {contents.length > 0 && (
+              <div className="mk-tag-row">
+                {contentCategories.map(cat => (
+                  <button key={cat} type="button" className={`mk-tag${cat === activeCategory ? ' active' : ''}`}
+                    onClick={() => setActiveCategory(cat)}>
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            )}
+            {filteredContents.length > 0 ? (
               <div className="mk-carousel-viewport">
                 <div className={`mk-carousel${loopsCarousel ? '' : ' no-loop'}`}>
                   {carouselItems.map((item, i) => (
@@ -272,15 +287,12 @@ export default function MidiaKitPage() {
                   ))}
                 </div>
               </div>
-            </div>
-          ) : !pageLoading && (
-            <div className="mk-carousel-wrap">
-              <span className="mk-eyebrow mk-carousel-label">Alguns conteúdos</span>
+            ) : !contentsLoading && (
               <p style={{ fontSize: '0.85rem', color: 'var(--mk-ink-dim)' }}>
-                Nenhum conteúdo adicionado ainda — adicione pelo painel em Landing Pages → Mídia Kit.
+                Nenhum conteúdo adicionado ainda — adicione pelo painel em Landing Pages → Conteúdos.
               </p>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 

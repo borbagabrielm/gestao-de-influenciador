@@ -183,6 +183,20 @@
 /* ---------- carrossel (marquee automático) ---------- */
 .midia-kit .mk-carousel-wrap { position: relative; margin-top: 40px; }
 .midia-kit .mk-carousel-label { display: block; margin-bottom: 14px; color: var(--mk-ink-dim); }
+
+.midia-kit .mk-tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+.midia-kit .mk-tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 7px 14px;
+  border: 1px solid var(--mk-paper-line);
+  background: transparent;
+  color: var(--mk-ink-dim);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.midia-kit .mk-tag:hover { color: var(--mk-ink); border-color: var(--mk-chrome-2); }
+.midia-kit .mk-tag.active { color: var(--mk-cream); background: var(--mk-cobalt); border-color: var(--mk-cobalt); }
 .midia-kit .mk-carousel-viewport {
   overflow: hidden;
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);

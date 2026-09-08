@@ -330,36 +330,53 @@ export default function LandingPageEditor() {
         </div>
       )}
 
-      {/* Carrossel de conteúdos */}
-      <div className="card">
-        <div className="flex items-center justify-between mb-4">
-          <div className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Carrossel de conteúdos ({sortedItems.length})</div>
-          <input ref={itemsFileRef} type="file" accept="image/*,video/mp4,video/webm" multiple className="hidden" onChange={handleItemsUpload} />
-          <button className="btn-ghost" onClick={() => itemsFileRef.current?.click()} disabled={uploadingItems}>
-            {uploadingItems ? 'Enviando...' : '+ Adicionar conteúdo(s)'}
-          </button>
-        </div>
-
-        {sortedItems.length === 0 ? (
-          <p className="text-xs" style={{ color: 'var(--text3)' }}>Nenhum conteúdo adicionado ainda.</p>
-        ) : (
-          <div className="space-y-2.5">
-            {sortedItems.map((item, i) => (
-              <div key={item.id} className="flex items-center gap-3 p-2.5 rounded-lg" style={{ background: 'var(--bg3)' }}>
-                {isVideoUrl(item.mediaUrl)
-                  ? <video src={item.mediaUrl} className="w-10 h-14 rounded object-cover flex-shrink-0" muted loop autoPlay playsInline />
-                  : <img src={item.mediaUrl} alt="" className="w-10 h-14 rounded object-cover flex-shrink-0" />}
-                <input className="form-input flex-1 text-xs" placeholder="Link do post no Instagram (opcional)"
-                  value={item.linkUrl} onChange={e => updateCarouselItem(item.id, { linkUrl: e.target.value })} />
-                <ReorderButtons index={i} total={sortedItems.length} confirmLabel="Remover este conteúdo?"
-                  onUp={() => reorderCarouselItem(item.id, 'up')}
-                  onDown={() => reorderCarouselItem(item.id, 'down')}
-                  onRemove={() => removeCarouselItem(item.id)} />
-              </div>
-            ))}
+      {/* Carrossel de conteúdos — só existe em páginas de campanha; no mídia
+          kit os conteúdos vêm da biblioteca global (ver link-out abaixo) */}
+      {isCampaign && (
+        <div className="card">
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Carrossel de conteúdos ({sortedItems.length})</div>
+            <input ref={itemsFileRef} type="file" accept="image/*,video/mp4,video/webm" multiple className="hidden" onChange={handleItemsUpload} />
+            <button className="btn-ghost" onClick={() => itemsFileRef.current?.click()} disabled={uploadingItems}>
+              {uploadingItems ? 'Enviando...' : '+ Adicionar conteúdo(s)'}
+            </button>
           </div>
-        )}
-      </div>
+
+          {sortedItems.length === 0 ? (
+            <p className="text-xs" style={{ color: 'var(--text3)' }}>Nenhum conteúdo adicionado ainda.</p>
+          ) : (
+            <div className="space-y-2.5">
+              {sortedItems.map((item, i) => (
+                <div key={item.id} className="flex items-center gap-3 p-2.5 rounded-lg" style={{ background: 'var(--bg3)' }}>
+                  {isVideoUrl(item.mediaUrl)
+                    ? <video src={item.mediaUrl} className="w-10 h-14 rounded object-cover flex-shrink-0" muted loop autoPlay playsInline />
+                    : <img src={item.mediaUrl} alt="" className="w-10 h-14 rounded object-cover flex-shrink-0" />}
+                  <input className="form-input flex-1 text-xs" placeholder="Link do post no Instagram (opcional)"
+                    value={item.linkUrl} onChange={e => updateCarouselItem(item.id, { linkUrl: e.target.value })} />
+                  <ReorderButtons index={i} total={sortedItems.length} confirmLabel="Remover este conteúdo?"
+                    onUp={() => reorderCarouselItem(item.id, 'up')}
+                    onDown={() => reorderCarouselItem(item.id, 'down')}
+                    onRemove={() => removeCarouselItem(item.id)} />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {!isCampaign && (
+        <div className="card">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Conteúdos</div>
+              <p className="text-xs mt-1" style={{ color: 'var(--text3)' }}>
+                Compartilhados entre todas as landing pages, organizados por categoria — editados num só lugar.
+              </p>
+            </div>
+            <Link to="/painel/landing-pages/conteudos" className="btn-ghost">Gerenciar conteúdos →</Link>
+          </div>
+        </div>
+      )}
 
       {/* Depoimentos — agora gerenciados globalmente, compartilhados entre landing pages */}
       <div className="card">
