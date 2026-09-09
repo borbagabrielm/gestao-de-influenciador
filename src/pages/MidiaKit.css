@@ -344,29 +344,6 @@
   -webkit-mask-position: center; mask-position: center;
 }
 
-/* ---------- depoimentos (comentários estilo Instagram) ---------- */
-.midia-kit .mk-testimonial-card {
-  flex: 0 0 auto;
-  width: clamp(220px, 26vw, 300px);
-  border: 1px solid var(--mk-paper-line);
-  background: var(--mk-paper);
-  padding: 16px;
-  display: flex; flex-direction: column; gap: 10px;
-}
-.midia-kit .mk-testimonial-head { display: flex; align-items: center; gap: 10px; }
-.midia-kit .mk-testimonial-avatar {
-  width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex-shrink: 0;
-  background: var(--mk-paper-2);
-}
-.midia-kit .mk-testimonial-initial {
-  display: flex; align-items: center; justify-content: center;
-  font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.85rem; color: var(--mk-ink-dim);
-}
-.midia-kit .mk-testimonial-name-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; flex: 1; min-width: 0; }
-.midia-kit .mk-testimonial-name { font-weight: 700; font-size: 0.85rem; }
-.midia-kit .mk-testimonial-handle { font-size: 0.72rem; color: var(--mk-ink-dim); }
-.midia-kit .mk-testimonial-comment { font-size: 0.82rem; line-height: 1.5; }
-
 /* ---------- contact / footer ---------- */
 .midia-kit .mk-contact { background: var(--mk-grain), repeating-linear-gradient(90deg, var(--mk-dark-line) 0 1px, transparent 1px 56px), var(--mk-charcoal); background-blend-mode: multiply, normal, normal; color: var(--mk-cream); }
 .midia-kit .mk-contact-stack { font-size: clamp(2.6rem, 7vw, 5.6rem); line-height: 0.94; }

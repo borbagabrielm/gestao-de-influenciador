@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase'
 
 // Upload genérico pro bucket público das landing pages, usado tanto pelo
-// conteúdo de cada página quanto pelo pool global de depoimentos/marcas.
+// conteúdo de cada página quanto pelos pools globais de conteúdos/marcas.
 export async function uploadToLandingPagesBucket(file, folder) {
   const ext = file.name.split('.').pop()
   const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`

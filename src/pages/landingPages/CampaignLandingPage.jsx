@@ -3,7 +3,6 @@ import { Link, useParams } from 'react-router-dom'
 import '@/pages/MidiaKit.css'
 import './Campaign.css'
 import { useLandingPage } from '@/hooks/useLandingPages'
-import { useTestimonials } from '@/hooks/useTestimonials'
 import { SOCIALS, WhatsAppIcon, MailIcon, InstagramIcon, TikTokIcon } from '@/components/SocialIcons'
 import { fmtN } from '@/pages/metricas/shared.js'
 import { isVideoUrl } from '@/lib/media'
@@ -135,7 +134,6 @@ function PlatformBlock({ platform, label, handle, icon, stats, loading, error, s
 export default function CampaignLandingPage() {
   const { slug } = useParams()
   const { page, items, brands, caseStudies, loading: pageLoading } = useLandingPage(slug)
-  const { testimonials } = useTestimonials()
   const { data: stats, status } = useCampaignStats()
   const statsLoading = status === 'loading'
   const statsError = status === 'error'
@@ -144,8 +142,6 @@ export default function CampaignLandingPage() {
   const c = page?.content || {}
   const loopsCarousel = items.length >= MIN_FOR_LOOP
   const carouselItems = loopsCarousel ? [...items, ...items] : items
-  const loopsTestimonials = testimonials.length >= MIN_FOR_LOOP
-  const testimonialItems = loopsTestimonials ? [...testimonials, ...testimonials] : testimonials
   const loopsBrands = brands.length >= MIN_FOR_LOOP
   const brandItems = loopsBrands ? [...brands, ...brands] : brands
   const sortedCases = [...caseStudies].sort((a, b) => a.position - b.position)
@@ -181,9 +177,8 @@ export default function CampaignLandingPage() {
         <span><b>02</b> CASES</span>
         <span><b>03</b> CONTEÚDO</span>
         <span><b>04</b> MÉTRICAS</span>
-        <span><b>05</b> PROVA&nbsp;SOCIAL</span>
-        <span><b>06</b> PARCEIROS</span>
-        <span><b>07</b> CONTATO</span>
+        <span><b>05</b> PARCEIROS</span>
+        <span><b>06</b> CONTATO</span>
       </div>
       <div className="mk-rule" />
 
@@ -319,58 +314,11 @@ export default function CampaignLandingPage() {
 
       <div className="mk-rule" />
 
-      {/* 05 PROVA SOCIAL */}
-      <div className="mk-section on-paper-2 mk-reveal">
-        <div className="mk-shell">
-          <div className="mk-section-head">
-            <div className="mk-section-num">05</div>
-            <div>
-              <span className="mk-eyebrow">Prova social</span>
-              <h2 className="mk-section-title">O que a comunidade diz</h2>
-              <p className="mk-section-desc">Nico possui uma comunidade extremamente engajada que vibra e aprecia cada conteúdo publicado.</p>
-            </div>
-          </div>
-          {testimonials.length > 0 ? (
-            <div className="mk-carousel-viewport">
-              <div className={`mk-carousel${loopsTestimonials ? '' : ' no-loop'}`}>
-                {testimonialItems.map((t, i) => (
-                  <div key={t.id + '-' + i} className="mk-testimonial-card">
-                    <div className="mk-testimonial-head">
-                      {t.avatarUrl ? (
-                        <img className="mk-testimonial-avatar" src={t.avatarUrl} alt={t.name} />
-                      ) : (
-                        <div className="mk-testimonial-avatar mk-testimonial-initial">{t.name.slice(0, 1).toUpperCase()}</div>
-                      )}
-                      <div className="mk-testimonial-name-row">
-                        <div>
-                          <div className="mk-testimonial-name">{t.name}</div>
-                          <div className="mk-testimonial-handle mk-mono">@{t.handle}</div>
-                        </div>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" style={{ flexShrink: 0, opacity: 0.5 }}>
-                          <rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none" />
-                        </svg>
-                      </div>
-                    </div>
-                    <p className="mk-testimonial-comment">{t.comment}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : !pageLoading && (
-            <p style={{ fontSize: '0.85rem', color: 'var(--mk-ink-dim)', textAlign: 'center' }}>
-              Nenhum depoimento adicionado ainda — adicione pelo painel em Landing Pages → Depoimentos.
-            </p>
-          )}
-        </div>
-      </div>
-
-      <div className="mk-rule" />
-
-      {/* 06 PARCEIROS */}
+      {/* 05 PARCEIROS */}
       <div className="mk-section on-paper mk-reveal">
         <div className="mk-shell">
           <div className="mk-section-head">
-            <div className="mk-section-num">06</div>
+            <div className="mk-section-num">05</div>
             <div>
               <span className="mk-eyebrow">{c.partners_eyebrow}</span>
               <h2 className="mk-section-title">{c.partners_title}</h2>
@@ -397,10 +345,10 @@ export default function CampaignLandingPage() {
         </div>
       </div>
 
-      {/* 07 CONTATO */}
+      {/* 06 CONTATO */}
       <div className="mk-section mk-contact mk-reveal">
         <div className="mk-shell">
-          <span className="mk-eyebrow" style={{ color: 'var(--mk-chrome-1)' }}>07 · Contato</span>
+          <span className="mk-eyebrow" style={{ color: 'var(--mk-chrome-1)' }}>06 · Contato</span>
           <h2 className="mk-contact-stack" style={{ marginTop: 14 }}>{c.contact_title}</h2>
           <p className="mk-contact-sub">{c.contact_subtitle}</p>
           <div className="mk-cta-row">

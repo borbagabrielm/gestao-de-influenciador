@@ -11,7 +11,7 @@ const fromDB = r => ({
 })
 
 // Conteúdos são globais — mesmo pool usado por todas as landing pages,
-// editado num só lugar (mesmo padrão de useTestimonials).
+// editado num só lugar.
 export function useContents() {
   const [contents, setContents] = useState([])
   const [loading, setLoading] = useState(true)

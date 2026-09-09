@@ -5,7 +5,6 @@ import { useIsMobile } from '@/hooks/useIsMobile'
 import { useLandingPages } from '@/hooks/useLandingPages'
 import LandingPagesList from './List'
 import LandingPageEditor from './Editor'
-import LandingPagesTestimonials from './Testimonials'
 import LandingPagesContents from './Contents'
 
 export default function LandingPagesPage() {
@@ -28,9 +27,6 @@ export default function LandingPagesPage() {
           <SidebarItem active={location.pathname.endsWith('conteudos')} onClick={() => nav('/painel/landing-pages/conteudos')}>
             Conteúdos
           </SidebarItem>
-          <SidebarItem active={location.pathname.endsWith('depoimentos')} onClick={() => nav('/painel/landing-pages/depoimentos')}>
-            Depoimentos
-          </SidebarItem>
         </SidebarSection>
       </Sidebar>
 
@@ -44,7 +40,6 @@ export default function LandingPagesPage() {
         <div className="flex-1 overflow-y-auto p-6">
           <Routes>
             <Route index element={<LandingPagesList pages={pages} createPage={createPage} duplicatePage={duplicatePage} />} />
-            <Route path="depoimentos" element={<LandingPagesTestimonials />} />
             <Route path="conteudos" element={<LandingPagesContents />} />
             <Route path=":slug" element={<LandingPageEditor />} />
           </Routes>

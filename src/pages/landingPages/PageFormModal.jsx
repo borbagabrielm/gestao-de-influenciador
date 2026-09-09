@@ -29,8 +29,8 @@ export default function PageFormModal({ mode, sourcePage, onClose, onSubmit }) {
         </div>
         <p className="text-xs mb-4" style={{ color: 'var(--text3)' }}>
           {mode === 'duplicate'
-            ? 'Cria uma cópia completa (conteúdo, carrossel, marcas e publicidades). Os depoimentos são compartilhados, não precisam ser duplicados.'
-            : 'Cria uma página do tipo campanha, usando a mesma estrutura da página padrão (hero, sobre, cases, conteúdo, métricas, prova social, parceiros, contato).'}
+            ? 'Cria uma cópia completa (conteúdo, carrossel, marcas e publicidades).'
+            : 'Cria uma página do tipo campanha, usando a mesma estrutura da página padrão (hero, sobre, cases, conteúdo, métricas, parceiros, contato).'}
         </p>
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>

@@ -125,7 +125,6 @@ export function useLandingPages() {
   }
 
   // Duplica uma página inteira: registro + conteúdo + carrossel + marcas + case studies.
-  // Depoimentos não são copiados — são globais, compartilhados por todas as páginas.
   const duplicatePage = async (sourcePageId, { slug, name, description }) => {
     const cleanSlug = slugify(slug)
     if (!cleanSlug) throw new Error('Slug inválido')
@@ -168,7 +167,6 @@ export function useLandingPages() {
 }
 
 // ── Página única + itens de carrossel + marcas + case studies (tela do editor) ──
-// Depoimentos não vivem mais aqui — são globais, ver useTestimonials().
 export function useLandingPage(slug) {
   const [page, setPage] = useState(null)
   const [items, setItems] = useState([])

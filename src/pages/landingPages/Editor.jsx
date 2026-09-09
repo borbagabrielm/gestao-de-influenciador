@@ -394,19 +394,6 @@ export default function LandingPageEditor() {
         </div>
       )}
 
-      {/* Depoimentos — agora gerenciados globalmente, compartilhados entre landing pages */}
-      <div className="card">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Depoimentos</div>
-            <p className="text-xs mt-1" style={{ color: 'var(--text3)' }}>
-              Compartilhados entre todas as landing pages — editados num só lugar.
-            </p>
-          </div>
-          <Link to="/painel/landing-pages/depoimentos" className="btn-ghost">Gerenciar depoimentos →</Link>
-        </div>
-      </div>
-
       {/* Marcas parceiras */}
       <div className="card">
         <div className="flex items-center justify-between mb-4">

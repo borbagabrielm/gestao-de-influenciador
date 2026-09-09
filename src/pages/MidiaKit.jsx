@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import './MidiaKit.css'
 import { useLandingPage } from '@/hooks/useLandingPages'
-import { useTestimonials } from '@/hooks/useTestimonials'
 import { useContents } from '@/hooks/useContents'
 import { SOCIALS, WhatsAppIcon, MailIcon, InstagramIcon, TikTokIcon } from '@/components/SocialIcons'
 import { MapPin, Calendar, Users } from 'lucide-react'
@@ -167,7 +166,6 @@ function BentoEmpty() {
 
 export default function MidiaKitPage() {
   const { page, brands, loading: pageLoading } = useLandingPage('midia-kit')
-  const { testimonials } = useTestimonials()
   const { contents, loading: contentsLoading } = useContents()
   const [activeCategory, setActiveCategory] = useState('Principais')
   const { data: stats, status } = useMidiaKitStats()
@@ -193,8 +191,6 @@ export default function MidiaKitPage() {
   const filteredContents = activeCategory === 'Principais' ? contents : contents.filter(ct => ct.category === activeCategory)
   const loopsCarousel = filteredContents.length >= MIN_FOR_LOOP
   const carouselItems = loopsCarousel ? [...filteredContents, ...filteredContents] : filteredContents
-  const loopsTestimonials = testimonials.length >= MIN_FOR_LOOP
-  const testimonialItems = loopsTestimonials ? [...testimonials, ...testimonials] : testimonials
   const loopsBrands = brands.length >= MIN_FOR_LOOP
   const brandItems = loopsBrands ? [...brands, ...brands] : brands
 
@@ -223,9 +219,8 @@ export default function MidiaKitPage() {
         <a href="#secao-instagram"><b>02</b> INSTAGRAM</a>
         <a href="#secao-tiktok"><b>03</b> TIKTOK</a>
         <a href="#secao-audiencia"><b>04</b> AUDIÊNCIA</a>
-        <a href="#secao-prova-social"><b>05</b> PROVA&nbsp;SOCIAL</a>
-        <a href="#secao-parceiros"><b>06</b> PARCEIROS</a>
-        <a href="#secao-contato"><b>07</b> CONTATO</a>
+        <a href="#secao-parceiros"><b>05</b> PARCEIROS</a>
+        <a href="#secao-contato"><b>06</b> CONTATO</a>
       </div>
       <div className="mk-rule" />
 
@@ -388,58 +383,11 @@ export default function MidiaKitPage() {
 
       <div className="mk-rule" />
 
-      {/* 05 PROVA SOCIAL */}
-      <div id="secao-prova-social" className="mk-section on-paper-2 mk-reveal" style={{ scrollMarginTop: 24 }}>
-        <div className="mk-shell">
-          <div className="mk-section-head">
-            <div className="mk-section-num">04</div>
-            <div>
-              <span className="mk-eyebrow">Prova social</span>
-              <h2 className="mk-section-title">O que a comunidade diz</h2>
-              <p className="mk-section-desc">Nico possui uma comunidade extremamente engajada que vibra e aprecia cada conteúdo publicado.</p>
-            </div>
-          </div>
-          {testimonials.length > 0 ? (
-            <div className="mk-carousel-viewport">
-              <div className={`mk-carousel${loopsTestimonials ? '' : ' no-loop'}`}>
-                {testimonialItems.map((t, i) => (
-                  <div key={t.id + '-' + i} className="mk-testimonial-card">
-                    <div className="mk-testimonial-head">
-                      {t.avatarUrl ? (
-                        <img className="mk-testimonial-avatar" src={t.avatarUrl} alt={t.name} />
-                      ) : (
-                        <div className="mk-testimonial-avatar mk-testimonial-initial">{t.name.slice(0, 1).toUpperCase()}</div>
-                      )}
-                      <div className="mk-testimonial-name-row">
-                        <div>
-                          <div className="mk-testimonial-name">{t.name}</div>
-                          <div className="mk-testimonial-handle mk-mono">@{t.handle}</div>
-                        </div>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" style={{ flexShrink: 0, opacity: 0.5 }}>
-                          <rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none" />
-                        </svg>
-                      </div>
-                    </div>
-                    <p className="mk-testimonial-comment">{t.comment}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : !pageLoading && (
-            <p style={{ fontSize: '0.85rem', color: 'var(--mk-ink-dim)', textAlign: 'center' }}>
-              Nenhum depoimento adicionado ainda — adicione pelo painel em Landing Pages → Mídia Kit.
-            </p>
-          )}
-        </div>
-      </div>
-
-      <div className="mk-rule" />
-
-      {/* 06 PARCEIROS */}
+      {/* 04 PARCEIROS */}
       <div id="secao-parceiros" className="mk-section on-paper mk-reveal" style={{ scrollMarginTop: 24 }}>
         <div className="mk-shell">
           <div className="mk-section-head">
-            <div className="mk-section-num">05</div>
+            <div className="mk-section-num">04</div>
             <div>
               <span className="mk-eyebrow">Nico e seus parceiros</span>
               <h2 className="mk-section-title">Marcas que já colaboraram</h2>
@@ -469,7 +417,7 @@ export default function MidiaKitPage() {
       {/* 07 CONTATO */}
       <div id="secao-contato" className="mk-section mk-contact mk-reveal" style={{ scrollMarginTop: 24 }}>
         <div className="mk-shell">
-          <span className="mk-eyebrow" style={{ color: 'var(--mk-chrome-1)' }}>07 · Contato</span>
+          <span className="mk-eyebrow" style={{ color: 'var(--mk-chrome-1)' }}>06 · Contato</span>
           <h2 className="mk-contact-stack" style={{ marginTop: 14 }}>{c.contact_title}</h2>
           <p className="mk-contact-sub">{c.contact_subtitle}</p>
           <div className="mk-cta-row">
