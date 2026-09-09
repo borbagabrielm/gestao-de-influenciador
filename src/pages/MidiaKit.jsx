@@ -53,6 +53,9 @@ const DEFAULT_CONTENT = {
   sobre_title: 'Autenticidade e ousadia em pessoa',
   sobre_paragraph_1: 'Para o Nico, a vida é um palco onde cada escolha é uma chance de deixar sua marca. Com looks icônicos, humor afiado e uma energia contagiante, ele inspira todo mundo ao redor com criatividade, sempre buscando o extraordinário em tudo o que faz.',
   sobre_paragraph_2: 'Fala (muito) sobre como se expressar através da moda está para aquilo que nos faz bem. Cria conteúdos extremamente lapidados e originais, mas também surfa em trends — sempre dando seu toque — compartilhando seu lifestyle de forma a inspirar quem se conecta com essa mistura única.',
+  metrics_eyebrow: 'Nas redes sociais',
+  metrics_title: 'Sente o impacto',
+  metrics_desc: 'Números reais, direto da base de dados da plataforma — atualizados automaticamente.',
   contact_title: 'bora conversar?',
   contact_subtitle: 'Vamos construir uma parceria de sucesso.',
   whatsapp_url: 'https://api.whatsapp.com/send?phone=5551981494510&text=Oi%20gostaria%20de%20mais%20informa%C3%A7%C3%B5es%20para%20uma%20parceria%20com%20o%20Nico',
@@ -188,12 +191,13 @@ export default function MidiaKitPage() {
     return () => { document.documentElement.style.scrollBehavior = prev }
   }, [])
 
-  // Enquanto ainda está buscando o conteúdo real, não usa o DEFAULT_CONTENT
-  // como se fosse o valor final — isso é o que causava o texto/foto antigos
-  // aparecerem por um instante antes de trocar pro conteúdo salvo no banco.
-  const c = page?.content && Object.keys(page.content).length
-    ? page.content
-    : (pageLoading ? {} : DEFAULT_CONTENT)
+  // Enquanto ainda está buscando o conteúdo real, fica em branco (não usa
+  // DEFAULT_CONTENT como se fosse definitivo — isso causava um flash de
+  // texto/foto antigos antes de trocar pro conteúdo salvo no banco). Depois
+  // de carregado, mescla por campo: qualquer chave nova que ainda não foi
+  // salva no banco (ex: um campo que acabou de ser adicionado ao código)
+  // cai no default em vez de aparecer em branco.
+  const c = pageLoading ? {} : { ...DEFAULT_CONTENT, ...(page?.content || {}) }
   const contentCategories = ['Principais', ...new Set(contents.map(ct => ct.category).filter(cat => cat && cat !== 'Principais'))]
   const filteredContents = activeCategory === 'Principais' ? contents : contents.filter(ct => ct.category === activeCategory)
   const loopsCarousel = filteredContents.length >= MIN_FOR_LOOP
@@ -309,9 +313,9 @@ export default function MidiaKitPage() {
           <div className="mk-section-head">
             <div className="mk-section-num">02</div>
             <div>
-              <span className="mk-eyebrow">Sente o impacto</span>
-              <h2 className="mk-section-title">Performance nas redes</h2>
-              <p className="mk-section-desc">Números reais, direto da base de dados da plataforma — atualizados automaticamente.</p>
+              <span className="mk-eyebrow">{c.metrics_eyebrow}</span>
+              <h2 className="mk-section-title">{c.metrics_title}</h2>
+              <p className="mk-section-desc">{c.metrics_desc}</p>
             </div>
           </div>
           <PlatformBlock id="secao-instagram" platform="instagram" label="Instagram" handle="@niconoal" icon={<InstagramIcon />} stats={stats?.instagram} loading={statsLoading} error={statsError} showComparison={c.metrics_comparison_enabled !== false} />

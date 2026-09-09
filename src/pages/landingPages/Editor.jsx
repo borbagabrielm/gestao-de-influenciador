@@ -26,6 +26,14 @@ const SECTIONS_BY_TYPE = {
       ],
     },
     {
+      label: 'Performance (Instagram/TikTok)',
+      fields: [
+        ['metrics_eyebrow', 'Categoria'],
+        ['metrics_title', 'Título'],
+        ['metrics_desc', 'Descrição', 'textarea'],
+      ],
+    },
+    {
       label: 'Contato',
       fields: [
         ['contact_title', 'Título da chamada final'],
