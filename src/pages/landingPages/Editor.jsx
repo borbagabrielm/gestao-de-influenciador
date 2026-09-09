@@ -34,6 +34,14 @@ const SECTIONS_BY_TYPE = {
       ],
     },
     {
+      label: 'Audience Insights',
+      fields: [
+        ['audience_eyebrow', 'Categoria'],
+        ['audience_title', 'Título'],
+        ['audience_desc', 'Descrição', 'textarea'],
+      ],
+    },
+    {
       label: 'Contato',
       fields: [
         ['contact_title', 'Título da chamada final'],

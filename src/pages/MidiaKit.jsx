@@ -9,7 +9,6 @@ import { MapPin, Calendar, Users } from 'lucide-react'
 import { fmtN, PLAT_COLOR } from '@/pages/metricas/shared.js'
 import { isVideoUrl } from '@/lib/media'
 import HorizontalBarChart from '@/components/charts/HorizontalBarChart'
-import PieChart from '@/components/charts/PieChart'
 
 const STATS_URL = 'https://rciywgiuktjipcjtmrzw.supabase.co/functions/v1/midia-kit'
 const MIN_FOR_LOOP = 4
@@ -56,6 +55,9 @@ const DEFAULT_CONTENT = {
   metrics_eyebrow: 'Nas redes sociais',
   metrics_title: 'Sente o impacto',
   metrics_desc: 'Números reais, direto da base de dados da plataforma — atualizados automaticamente.',
+  audience_eyebrow: 'Audience Insights',
+  audience_title: 'Quem são os ICONS?!',
+  audience_desc: 'Seguidores do Nico que foram carinhosamente apelidados assim por ele.',
   contact_title: 'bora conversar?',
   contact_subtitle: 'Vamos construir uma parceria de sucesso.',
   whatsapp_url: 'https://api.whatsapp.com/send?phone=5551981494510&text=Oi%20gostaria%20de%20mais%20informa%C3%A7%C3%B5es%20para%20uma%20parceria%20com%20o%20Nico',
@@ -155,21 +157,10 @@ function PlatformBlock({ id, platform, label, handle, icon, stats, loading, erro
   )
 }
 
-function AudiencePanel({ icon, title, empty, children }) {
+function BentoEmpty() {
   return (
-    <div className="mk-platform aud">
-      <div className="mk-platform-head">
-        <div className="bar aud" />
-        <div className="mk-platform-icon">{icon}</div>
-        <div className="mk-platform-name">{title}</div>
-      </div>
-      <div className="mk-audience-body">
-        {empty ? (
-          <div style={{ textAlign: 'center', padding: '10px 0' }}>
-            <span className="mk-audience-tag mk-mono">Em breve</span>
-          </div>
-        ) : children}
-      </div>
+    <div style={{ textAlign: 'center', padding: '10px 0' }}>
+      <span className="mk-audience-tag mk-mono">Em breve</span>
     </div>
   )
 }
@@ -206,6 +197,12 @@ export default function MidiaKitPage() {
   const testimonialItems = loopsTestimonials ? [...testimonials, ...testimonials] : testimonials
   const loopsBrands = brands.length >= MIN_FOR_LOOP
   const brandItems = loopsBrands ? [...brands, ...brands] : brands
+
+  const audienceCities = stats?.audience?.cities || []
+  const topCity = audienceCities[0]
+  const restCities = audienceCities.slice(1)
+  const genderData = stats?.audience?.gender || []
+  const genderTotal = genderData.reduce((s, g) => s + g.value, 0) || 1
 
   useLazyCarouselVideos([carouselItems.length, activeCategory])
 
@@ -325,31 +322,66 @@ export default function MidiaKitPage() {
 
       <div className="mk-rule" />
 
-      {/* 04 AUDIENCIA */}
+      {/* 03 AUDIENCIA */}
       <div id="secao-audiencia" className="mk-section on-paper mk-reveal" style={{ scrollMarginTop: 24 }}>
         <div className="mk-shell">
           <div className="mk-section-head">
-            <div className="mk-section-num">04</div>
+            <div className="mk-section-num">03</div>
             <div>
-              <span className="mk-eyebrow">Quem acompanha</span>
-              <h2 className="mk-section-title">Audience Insights</h2>
-              <p className="mk-section-desc">Dados demográficos da audiência — em implementação.</p>
+              <span className="mk-eyebrow">{c.audience_eyebrow}</span>
+              <h2 className="mk-section-title">{c.audience_title}</h2>
+              <p className="mk-section-desc">{c.audience_desc}</p>
             </div>
           </div>
-          <div className="mk-audience-grid">
-            <AudiencePanel icon={<MapPin size={16} />} title="Cidades" empty={!stats?.audience?.cities?.length}>
-              <HorizontalBarChart items={stats?.audience?.cities || []} barColor="var(--mk-cobalt-chart)" trackColor="var(--mk-paper-line)"
-                labelColor="var(--mk-ink-dim)" valueColor="var(--mk-cobalt-chart)" radius={0} fontFamily="'Space Mono', monospace" valueFontFamily="'Syne', sans-serif" />
-            </AudiencePanel>
-            <AudiencePanel icon={<Calendar size={16} />} title="Faixa etária" empty={!stats?.audience?.age?.length}>
-              <HorizontalBarChart items={stats?.audience?.age || []} barColor="var(--mk-cobalt-chart)" trackColor="var(--mk-paper-line)"
-                labelColor="var(--mk-ink-dim)" valueColor="var(--mk-cobalt-chart)" radius={0} fontFamily="'Space Mono', monospace" valueFontFamily="'Syne', sans-serif" />
-            </AudiencePanel>
-            <AudiencePanel icon={<Users size={16} />} title="Gênero" empty={!stats?.audience?.gender?.length}>
-              <PieChart
-                items={(stats?.audience?.gender || []).map((d, i) => ({ label: d.label, value: d.value, color: ['var(--mk-cobalt-chart)', 'var(--mk-vermilion)'][i % 2] }))}
-                labelColor="var(--mk-ink-dim)" valueColor="var(--mk-ink)" size={120} swatchShape="square" fontFamily="'Space Mono', monospace" valueFontFamily="'Syne', sans-serif" />
-            </AudiencePanel>
+
+          <div className="mk-bento-grid">
+            {/* cidade nº1 — número gigante */}
+            <div className="mk-bento hero">
+              {topCity ? (
+                <>
+                  <span className="mk-bento-lbl mk-mono"><MapPin size={13} /> Top cidade</span>
+                  <div className="mk-bento-big">{topCity.value.toFixed(1)}%</div>
+                  <div className="mk-bento-name">{topCity.label}</div>
+                </>
+              ) : <BentoEmpty />}
+            </div>
+
+            {/* demais cidades — lista compacta */}
+            <div className="mk-bento list">
+              <span className="mk-bento-lbl mk-mono"><MapPin size={13} /> Outras cidades</span>
+              {restCities.length ? (
+                <HorizontalBarChart items={restCities} barColor="var(--mk-cobalt)" trackColor="var(--mk-paper-line)"
+                  labelColor="var(--mk-ink-dim)" valueColor="var(--mk-cobalt)" radius={0} height={7} gap={12}
+                  fontFamily="'Space Mono', monospace" valueFontFamily="'Space Mono', monospace" />
+              ) : <BentoEmpty />}
+            </div>
+
+            {/* gênero — bloco dividido */}
+            <div className="mk-bento split">
+              <span className="mk-bento-lbl mk-mono"><Users size={13} /> Gênero</span>
+              {genderData.length ? (
+                <div className="mk-bento-split-bar">
+                  {genderData.map((g, i) => (
+                    <div key={g.label} className={`seg${i === 0 ? ' a' : ' b'}`} style={{ flexBasis: `${(g.value / genderTotal) * 100}%` }}>
+                      <span className="pct mk-mono">{((g.value / genderTotal) * 100).toFixed(0)}%</span>
+                    </div>
+                  ))}
+                </div>
+              ) : <BentoEmpty />}
+              <div className="mk-bento-split-legend mk-mono">
+                {genderData.map(g => <span key={g.label}>{g.label}</span>)}
+              </div>
+            </div>
+
+            {/* faixa etária — barra larga em fundo escuro */}
+            <div className="mk-bento wide">
+              <span className="mk-bento-lbl mk-mono"><Calendar size={13} /> Faixa etária</span>
+              {stats?.audience?.age?.length ? (
+                <HorizontalBarChart items={stats.audience.age} barColor="var(--mk-cobalt)" trackColor="rgba(255,255,255,0.12)"
+                  labelColor="var(--mk-cream-dim)" valueColor="var(--mk-cream)" radius={0} height={8} gap={10}
+                  fontFamily="'Space Mono', monospace" valueFontFamily="'Space Mono', monospace" />
+              ) : <BentoEmpty />}
+            </div>
           </div>
         </div>
       </div>
@@ -360,7 +392,7 @@ export default function MidiaKitPage() {
       <div id="secao-prova-social" className="mk-section on-paper-2 mk-reveal" style={{ scrollMarginTop: 24 }}>
         <div className="mk-shell">
           <div className="mk-section-head">
-            <div className="mk-section-num">05</div>
+            <div className="mk-section-num">04</div>
             <div>
               <span className="mk-eyebrow">Prova social</span>
               <h2 className="mk-section-title">O que a comunidade diz</h2>
@@ -407,7 +439,7 @@ export default function MidiaKitPage() {
       <div id="secao-parceiros" className="mk-section on-paper mk-reveal" style={{ scrollMarginTop: 24 }}>
         <div className="mk-shell">
           <div className="mk-section-head">
-            <div className="mk-section-num">06</div>
+            <div className="mk-section-num">05</div>
             <div>
               <span className="mk-eyebrow">Nico e seus parceiros</span>
               <h2 className="mk-section-title">Marcas que já colaboraram</h2>
